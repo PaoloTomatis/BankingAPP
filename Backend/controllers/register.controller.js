@@ -87,7 +87,7 @@ const register = async (req, res) => {
             res,
             201,
             true,
-            'Utente registrato con successo!'
+            'Utente registrato correttamente!'
         );
     } catch (error) {
         // Invio errore alla console

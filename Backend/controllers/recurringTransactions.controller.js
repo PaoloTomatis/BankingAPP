@@ -2,8 +2,8 @@
 import pool from '../database/database';
 import responseHandler from '../utils/responseHandler.utils';
 
-// Funzione per ricevere i tag
-const getTags = async (req, res) => {
+// Funzione per ricevere le transazioni ricorrenti
+const getRecurringTransactions = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
@@ -25,8 +25,8 @@ const getTags = async (req, res) => {
     }
 };
 
-// Funzione per aggiungere il tag
-const postTags = async (req, res) => {
+// Funzione per aggiungere la transazione ricorrente
+const postRecurringTransactions = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
@@ -48,8 +48,8 @@ const postTags = async (req, res) => {
     }
 };
 
-// Funzione per modificare il tag
-const patchTag = async (req, res) => {
+// Funzione per modificare la transazione ricorrente
+const patchRecurringTransaction = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
@@ -71,8 +71,8 @@ const patchTag = async (req, res) => {
     }
 };
 
-// Funzione per eliminare il tag
-const deleteTag = async (req, res) => {
+// Funzione per eliminare la transazione ricorrente
+const deleteRecurringTransaction = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
@@ -95,4 +95,9 @@ const deleteTag = async (req, res) => {
 };
 
 // Esportazione funzioni
-export { getTags, postTags, patchTag, deleteTag };
+export {
+    getRecurringTransactions,
+    postRecurringTransactions,
+    patchRecurringTransaction,
+    deleteRecurringTransaction,
+};

@@ -11,7 +11,12 @@ const getUser = async (req, res) => {
 
         // Controllo i dati ricevuti
         if (!user || typeof user !== 'object')
-            return responseHandler(res, 400, false, 'Errore nella richiesta!');
+            return responseHandler(
+                res,
+                401,
+                false,
+                'Login non effettuato correttamente!'
+            );
 
         // Invio risposta finale
         responseHandler(res, 200, true, null, user);
@@ -27,6 +32,59 @@ const getUser = async (req, res) => {
 const patchUser = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
+        // Ricevo dati dalla richiesta
+        const { username, email } = req.body.data;
+        const { id: userId } = req.user;
+
+        // Creazione liste per creazione della query
+        let fields = [];
+        let values = [];
+
+        // Controllo dati ricevuti
+        if (!userId)
+            return responseHandler(
+                res,
+                401,
+                false,
+                'Login non effettuato correttamente!'
+            );
+
+        // Aggiunta valori alle liste per creazione della query
+        if (username) {
+            fields.push('username = ?');
+            values.push(username);
+        }
+
+        if (email) {
+            fields.push('email = ?');
+            values.push(email);
+        }
+
+        // Controllo dati ricevuti
+        if (values.length <= 0 || fields.length <= 0)
+            return responseHandler(
+                res,
+                400,
+                false,
+                'Username o email mancanti!'
+            );
+
+        // Aggiunta userId ai valori
+        values.push(userId);
+
+        // Esecuzione aggiornamento utente
+        await pool.query(
+            `UPDATE users SET ${fields.join(', ')} WHERE userId = ?`,
+            values
+        );
+
+        // Invio risposta finale
+        return responseHandler(
+            res,
+            200,
+            true,
+            'Utente aggiornato correttamente!'
+        );
     } catch (error) {
         // Invio errore alla console
         console.error(error);
@@ -39,6 +97,28 @@ const patchUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
+        // Ricevo dati dalla richiesta
+        const { id: userId } = req.user;
+
+        // Controllo dati ricevuti
+        if (!userId)
+            return responseHandler(
+                res,
+                401,
+                false,
+                'Login non effettuato correttamente!'
+            );
+
+        // Esecuzione query
+        await pool.query('DELETE FROM users WHERE userId = ?', [userId]);
+
+        // Invio risposta finale
+        return responseHandler(
+            res,
+            200,
+            true,
+            'Utente eliminato correttamente!'
+        );
     } catch (error) {
         // Invio errore alla console
         console.error(error);
@@ -48,4 +128,4 @@ const deleteUser = async (req, res) => {
 };
 
 // Esportazione funzioni
-export { getUsers, patchUser, deleteUser };
+export { getUser, patchUser, deleteUser };
