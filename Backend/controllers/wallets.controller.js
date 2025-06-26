@@ -7,14 +7,17 @@ const getWallets = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { field, identificative } = req.query;
-        const { id: userId } = req.user;
+        const { field, identificative } = req.query ? req.query : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Lista di possibili campi
-        const possibleFields = ['id', 'userId', 'name'];
+        const possibleFields = ['id', 'name'];
+
+        // Lista di portafogli
+        let wallets = [];
 
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -23,19 +26,28 @@ const getWallets = async (req, res) => {
             );
 
         // Controllo dati ricevuti
-        if (!field || !identificative || !possibleFields.includes(field))
-            return responseHandler(
-                res,
-                400,
-                false,
-                'Dati mancanti o invalidi!'
+        if (!field || !identificative || typeof field !== 'string') {
+            // Richiesta portafogli tramite id dell'utente senza identificativo
+            [wallets] = await pool.query(
+                'SELECT * FROM wallets WHERE user_id = ?',
+                [userId]
             );
+        } else {
+            // Controllo dati ricevuti
+            if (!possibleFields.includes(field))
+                return responseHandler(
+                    res,
+                    400,
+                    false,
+                    'Dati mancanti o invalidi!'
+                );
 
-        // Richiesta portafogli tramite id dell'utente e identificativo
-        const [wallets] = await pool.query(
-            'SELECT * FROM wallets WHERE ?? = ?, user_id = ?',
-            [field, identificative, userId]
-        );
+            // Richiesta portafogli tramite id dell'utente e identificativo
+            [wallets] = await pool.query(
+                'SELECT * FROM wallets WHERE ?? = ? AND user_id = ?',
+                [field, identificative, userId]
+            );
+        }
 
         // Invio risposta finale
         return responseHandler(res, 200, true, null, wallets);
@@ -52,11 +64,11 @@ const postWallets = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { name } = req.body.data;
-        const { id: userId } = req.user;
+        const { name } = req.body && req.body.data ? req.body.data : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Controllo dei dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -104,12 +116,13 @@ const patchWallet = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { id: walletId } = req.body.where;
-        const { name } = req.body.data;
-        const { id: userId } = req.user;
+        const { id: walletId } =
+            req.body && req.body.where ? req.body.where : {};
+        const { name } = req.body && req.body.data ? req.body.data : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -121,7 +134,7 @@ const patchWallet = async (req, res) => {
         if (
             !walletId ||
             !name ||
-            typeof walletId !== 'number' ||
+            isNaN(walletId) ||
             typeof name !== 'string' ||
             name?.length < 3 ||
             name?.length > 30
@@ -135,7 +148,7 @@ const patchWallet = async (req, res) => {
 
         // Esecuzione aggiornamento portafoglio
         await pool.query(
-            'UPDATE wallets SET name = ? WHERE id = ?, user_id = ?',
+            'UPDATE wallets SET name = ? WHERE id = ? AND user_id = ?',
             [name, walletId, userId]
         );
 
@@ -159,11 +172,11 @@ const deleteWallet = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { id: walletId } = req.params;
-        const { id: userId } = req.user;
+        const { id: walletId } = req.params ? req.params : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -172,7 +185,7 @@ const deleteWallet = async (req, res) => {
             );
 
         // Controllo dati ricevuti
-        if (!walletId || typeof walletId !== 'number')
+        if (!walletId || isNaN(walletId))
             return responseHandler(
                 res,
                 400,
@@ -181,7 +194,7 @@ const deleteWallet = async (req, res) => {
             );
 
         // Esecuzione query di eliminazione
-        await pool.query('DELETE wallets WHERE userId = ?, id = ?', [
+        await pool.query('DELETE FROM wallets WHERE user_id = ? AND id = ?', [
             userId,
             walletId,
         ]);

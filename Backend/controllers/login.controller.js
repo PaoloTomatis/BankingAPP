@@ -13,7 +13,7 @@ const login = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { email, psw } = req.body;
+        const { email, psw } = req.body ? req.body : {};
 
         // Controllo dell'email
         if (
@@ -74,7 +74,7 @@ const login = async (req, res) => {
         );
 
         // Salvataggio refresh token nel database
-        await pool.query('UPDATE users SET refreshToken = ? WHERE id = ?', [
+        await pool.query('UPDATE users SET refresh_token = ? WHERE id = ?', [
             refreshToken,
             user.id,
         ]);
@@ -88,7 +88,7 @@ const login = async (req, res) => {
         });
 
         // Invio risposta con access token
-        return responseHandler(res, 200, true, null, { accessToken });
+        return responseHandler(res, 200, true, null, accessToken);
     } catch (error) {
         // Invio errore alla console
         console.error(error);

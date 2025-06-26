@@ -33,15 +33,16 @@ const patchUser = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { username, email } = req.body.data;
-        const { id: userId } = req.user;
+        const { username, email } =
+            req.body && req.body.data ? req.body.data : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Creazione liste per creazione della query
         let fields = [];
         let values = [];
 
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -50,12 +51,22 @@ const patchUser = async (req, res) => {
             );
 
         // Aggiunta valori alle liste per creazione della query
-        if (username) {
+        if (
+            username &&
+            username?.length < 30 &&
+            username?.length > 3 &&
+            typeof username == 'string'
+        ) {
             fields.push('username = ?');
             values.push(username);
         }
 
-        if (email) {
+        if (
+            email &&
+            email?.length < 255 &&
+            email.includes('@') &&
+            typeof username == 'string'
+        ) {
             fields.push('email = ?');
             values.push(email);
         }
@@ -66,7 +77,7 @@ const patchUser = async (req, res) => {
                 res,
                 400,
                 false,
-                'Username o email mancanti!'
+                'Dati mancanti o invalidi!'
             );
 
         // Aggiunta userId ai valori
@@ -74,7 +85,7 @@ const patchUser = async (req, res) => {
 
         // Esecuzione aggiornamento utente
         await pool.query(
-            `UPDATE users SET ${fields.join(', ')} WHERE userId = ?`,
+            `UPDATE users SET ${fields.join(', ')} WHERE id = ?`,
             values
         );
 
@@ -98,10 +109,10 @@ const deleteUser = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { id: userId } = req.user;
+        const { id: userId } = req.user ? req.user : {};
 
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -110,7 +121,7 @@ const deleteUser = async (req, res) => {
             );
 
         // Esecuzione query
-        await pool.query('DELETE FROM users WHERE userId = ?', [userId]);
+        await pool.query('DELETE FROM users WHERE id = ?', [userId]);
 
         // Invio risposta finale
         return responseHandler(

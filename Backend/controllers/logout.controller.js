@@ -7,7 +7,7 @@ const logout = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo cookie dalla richiesta
-        const { refreshToken } = req.cookies;
+        const { refreshToken } = req.cookies ? req.cookies : {};
 
         // Controllo i dati ricevuti
         if (!refreshToken || typeof refreshToken !== 'string')

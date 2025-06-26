@@ -10,7 +10,7 @@ const pool = createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PSW,
-    database: process.env.DB_DATABASEù,
+    database: process.env.DB_DATABASE,
 }).promise();
 
 // Esportazione della connessione

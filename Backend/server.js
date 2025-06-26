@@ -33,5 +33,10 @@ app.use('/auth', authRouter);
 // Rotta per l'api
 app.use('/api', verifyJWT, apiRouter);
 
+// Rotta 404
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Pagina non esistente!' });
+});
+
 // Avvio del server
 app.listen(PORT, () => console.log('Server avviato alla porta ' + PORT));

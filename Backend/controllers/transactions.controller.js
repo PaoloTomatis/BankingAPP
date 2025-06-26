@@ -7,14 +7,17 @@ const getTransactions = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { field, identificative } = req.query;
-        const { id: userId } = req.user;
+        const { field, identificative } = req.query ? req.query : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Lista di possibili campi
         const possibleFields = ['id', 'username', 'email', 'created_at'];
 
+        // Lista di transazioni
+        let transactions = [];
+
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -23,19 +26,28 @@ const getTransactions = async (req, res) => {
             );
 
         // Controllo dati ricevuti
-        if (!field || !identificative || !possibleFields.includes(field))
-            return responseHandler(
-                res,
-                400,
-                false,
-                'Dati mancanti o invalidi!'
+        if (!field || !identificative || typeof field !== 'string') {
+            // Richiesta transazioni tramite id dell'utente senza identificativo
+            [transactions] = await pool.query(
+                'SELECT * FROM transactions WHERE user_id = ?',
+                [userId]
             );
+        } else {
+            // Controllo dati ricevuti
+            if (!possibleFields.includes(field))
+                return responseHandler(
+                    res,
+                    400,
+                    false,
+                    'Dati mancanti o invalidi!'
+                );
 
-        // Richiesta transazioni tramite id dell'utente e identificativo
-        const [transactions] = await pool.query(
-            'SELECT * FROM transactions WHERE userId = ? AND ?? = ?',
-            [userId, field, identificative]
-        );
+            // Richiesta transazioni tramite id dell'utente e identificativo
+            [transactions] = await pool.query(
+                'SELECT * FROM transactions WHERE userId = ? AND ?? = ?',
+                [userId, field, identificative]
+            );
+        }
 
         // Invio risposta finale
         return responseHandler(res, 200, true, null, transactions);
@@ -52,14 +64,15 @@ const postTransactions = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { walletId, type, tagId, amount, date } = req.body.data;
-        const { id: userId } = req.user;
+        const { walletId, type, tagId, amount, date } =
+            req.body && req.body.data ? req.body.data : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Lista di possibili tipi
         const possibleTypes = ['income', 'expense'];
 
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -72,13 +85,11 @@ const postTransactions = async (req, res) => {
             !walletId ||
             !type ||
             !amount ||
-            !userId ||
             !date ||
             typeof date !== 'string' ||
-            typeof walletId !== 'number' ||
-            typeof amount !== 'number' ||
-            !possibleTypes.includes(type) ||
-            typeof userId !== 'number'
+            isNaN(walletId) ||
+            isNaN(amount) ||
+            !possibleTypes.includes(type)
         )
             return responseHandler(
                 res,
@@ -90,7 +101,14 @@ const postTransactions = async (req, res) => {
         // Esecuzione aggiunta transazione
         await pool.query(
             'INSERT INTO transactions (user_id, wallet_id, amount, type, tag_id, date) VALUES (?, ?, ?, ?, ?, ?)',
-            [userId, walletId, amount, type, tagId || null, date]
+            [
+                userId,
+                walletId,
+                parseFloat(amount.toFixed(2)),
+                type,
+                tagId || null,
+                date,
+            ]
         );
 
         // Invio risposta finale
@@ -113,15 +131,17 @@ const patchTransaction = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { id: transactionId } = req.body.where;
-        const { type, tagId, amount } = req.body.data;
-        const { id: userId } = req.user;
+        const { id: transactionId } =
+            req.body && req.body.where ? req.body.where : {};
+        const { type, tagId, amount } =
+            req.body && req.body.data ? req.body.data : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Lista di possibili tipi
         const possibleTypes = ['income', 'expense'];
 
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -130,12 +150,7 @@ const patchTransaction = async (req, res) => {
             );
 
         // Controllo dati ricevuti
-        if (
-            !transactionId ||
-            typeof transactionId !== 'number' ||
-            !userId ||
-            typeof userId !== 'number'
-        )
+        if (!transactionId || isNaN(transactionId))
             return responseHandler(
                 res,
                 400,
@@ -143,7 +158,7 @@ const patchTransaction = async (req, res) => {
                 'Dati mancanti o invalidi!'
             );
 
-        // Creazione liste per creazione della query
+        // Liste per creazione della query
         const fields = [];
         const values = [];
 
@@ -153,14 +168,14 @@ const patchTransaction = async (req, res) => {
             values.push(type);
         }
 
-        if (tagId) {
+        if (tagId && !isNaN(tagId)) {
             fields.push('tag_id = ?');
             values.push(tagId);
         }
 
-        if (amount) {
+        if (amount && !isNaN(amount)) {
             fields.push('amount = ?');
-            values.push(amount);
+            values.push(parseFloat(amount.toFixed(2)));
         }
 
         // Controllo dati ricevuti
@@ -173,11 +188,14 @@ const patchTransaction = async (req, res) => {
             );
 
         // Aggiunta id ai valori
-        values.push(id);
+        values.push(transactionId);
+        values.push(userId);
 
         // Esecuzione aggiornamento transazione
         await pool.query(
-            `UPDATE transactions SET ${fields.join(', ')} WHERE id = ?`,
+            `UPDATE transactions SET ${fields.join(
+                ', '
+            )} WHERE id = ? AND user_id = ?`,
             values
         );
 
@@ -201,11 +219,11 @@ const deleteTransaction = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { id: transactionId } = req.params;
-        const { id: userId } = req.user;
+        const { id: transactionId } = req.params ? req.params : {};
+        const { id: userId } = req.user ? req.user : {};
 
         // Controllo dati ricevuti
-        if (!userId)
+        if (!userId || isNaN(userId))
             return responseHandler(
                 res,
                 401,
@@ -214,7 +232,7 @@ const deleteTransaction = async (req, res) => {
             );
 
         // Controllo dati ricevuti
-        if (!transactionId || typeof transactionId !== 'number')
+        if (!transactionId || isNaN(transactionId))
             return responseHandler(
                 res,
                 400,
@@ -223,10 +241,10 @@ const deleteTransaction = async (req, res) => {
             );
 
         // Esecuzione query di eliminazione
-        await pool.query('DELETE transactions WHERE userId = ?, id = ?', [
-            userId,
-            transactionId,
-        ]);
+        await pool.query(
+            'DELETE FROM transactions WHERE userId = ? AND id = ?',
+            [userId, transactionId]
+        );
 
         // Invio risposta finale
         return responseHandler(

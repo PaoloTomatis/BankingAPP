@@ -8,7 +8,7 @@ const register = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { username, email, psw } = req.body;
+        const { username, email, psw } = req.body ? req.body : {};
 
         // Controllo dell'username
         if (
@@ -78,7 +78,7 @@ const register = async (req, res) => {
 
         // Inserimento utente nel database
         await pool.query(
-            'INSERT INTO users (username, email, psw, refreshToken) VALUES (?, ?, ?, ?)',
+            'INSERT INTO users (username, email, psw, refresh_token) VALUES (?, ?, ?, ?)',
             [username, email, pswHash, '']
         );
 

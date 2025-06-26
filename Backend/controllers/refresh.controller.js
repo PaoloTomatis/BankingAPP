@@ -12,7 +12,7 @@ const refresh = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo cookie dalla richiesta
-        const { refreshToken } = req.cookies;
+        const { refreshToken } = req.cookies ? req.cookies : {};
 
         // Controllo i dati ricevuti
         if (!refreshToken || typeof refreshToken !== 'string')
@@ -39,7 +39,7 @@ const refresh = async (req, res) => {
 
                 // Richiesta utente tramite id
                 const [[user]] = await pool.query(
-                    'SELECT id, email, username, refreshToken FROM users WHERE id = ?',
+                    'SELECT id, email, username, refresh_token FROM users WHERE id = ?',
                     [decoded.id]
                 );
 

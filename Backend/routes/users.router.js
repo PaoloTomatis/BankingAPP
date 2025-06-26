@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 // Creazione rotte per ricevere, modificare ed eliminare gli utenti
-router.get('/', getUser).patch('/', patchUser).delete('/:id', deleteUser);
+router.get('/', getUser).patch('/', patchUser).delete('/', deleteUser);
 
 // Esportazione del router
 export default router;
