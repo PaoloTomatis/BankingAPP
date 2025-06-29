@@ -18,7 +18,7 @@ const refresh = async (req, res) => {
         if (!refreshToken || typeof refreshToken !== 'string')
             return responseHandler(
                 res,
-                401,
+                403,
                 false,
                 'Refresh token mancante o invalido!'
             );
@@ -32,31 +32,22 @@ const refresh = async (req, res) => {
                 if (err)
                     return responseHandler(
                         res,
-                        401,
+                        403,
                         false,
                         'Refresh token mancante o invalido!'
                     );
 
                 // Richiesta utente tramite id
                 const [[user]] = await pool.query(
-                    'SELECT id, email, username, refresh_token FROM users WHERE id = ?',
-                    [decoded.id]
+                    'SELECT id, email, username, refresh_token FROM users WHERE id = ? AND refresh_token = ?',
+                    [decoded.id, refreshToken]
                 );
 
                 // Controllo l'esistenza dell'utente
                 if (!user)
                     return responseHandler(
                         res,
-                        401,
-                        false,
-                        'Refresh token mancante o invalido!'
-                    );
-
-                // Controllo che i refresh token siano uguali
-                if (user.refreshToken !== refreshToken)
-                    return responseHandler(
-                        res,
-                        401,
+                        403,
                         false,
                         'Refresh token mancante o invalido!'
                     );

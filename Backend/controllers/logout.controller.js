@@ -42,7 +42,7 @@ const logout = async (req, res) => {
 
         // Rimuovo il refresh token dal database
         await pool.query('UPDATE users SET refreshToken = ? WHERE id = ?', [
-            '',
+            null,
             user.id,
         ]);
 

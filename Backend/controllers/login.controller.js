@@ -22,12 +22,7 @@ const login = async (req, res) => {
             !email?.includes('@') ||
             email?.length > 255
         )
-            return responseHandler(
-                res,
-                400,
-                false,
-                'Email mancante o invalida!'
-            );
+            return responseHandler(res, 403, false, 'Email o Password errata!');
 
         // Controllo della password
         if (
@@ -36,12 +31,7 @@ const login = async (req, res) => {
             psw?.length < 8 ||
             psw?.length > 255
         )
-            return responseHandler(
-                res,
-                400,
-                false,
-                'Password mancante o invalida!'
-            );
+            return responseHandler(res, 403, false, 'Email o Password errata!');
 
         // Richiesta utente tramite email
         const [[user]] = await pool.query(
@@ -70,7 +60,7 @@ const login = async (req, res) => {
         const refreshToken = jwt.sign(
             { id: user.id, username: user.username, email: user.email },
             process.env.JWT_REFRESH_TOKEN,
-            { expiresIn: '7d' }
+            { expiresIn: '4d' }
         );
 
         // Salvataggio refresh token nel database
