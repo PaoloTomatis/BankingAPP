@@ -1,3 +1,5 @@
+@import 'tailwindcss';
+
 /* ! Reset */
 body,
 html {
@@ -53,23 +55,32 @@ a {
     text-decoration: none;
 }
 
-:root {
-    --primary: #80b6d5;
-    --secondary: #182934;
-    --primary-txt: #182934;
-    --secondary-txt: #6b8ba0;
-    --primary-bg: #cee1f3;
-    --secondary-bg: #f2f8fc;
-    --link: #80b6d5;
-    --link-hover: #5c91b4;
-    --primary-btn: #80b6d5;
-    --primary-btn-txt: #ffffff;
-    --primary-btn-hover: #80b6d5;
-    --secondary-btn: #ffffff;
-    --secondary-btn-txt: #80b6d5;
-    --border: #a0b3c1;
-    --input-border: #a0b3c1;
-    --input-border-focus: #80b6d5;
+@theme {
+    --color-primary: #80b6d5;
+    --color-secondary: #182934;
+    --color-primary-txt: #182934;
+    --color-secondary-txt: #6b8ba0;
+    --color-primary-bg: #cee1f3;
+    --color-secondary-bg: #f2f8fc;
+    --color-link: #80b6d5;
+    --color-link-hover: #5c91b4;
+    --color-primary-btn: #80b6d5;
+    --color-primary-btn-txt: #ffffff;
+    --color-primary-btn-hover: #80b6d5;
+    --color-secondary-btn: #ffffff;
+    --color-secondary-btn-txt: #80b6d5;
+    --color-border: #a0b3c1;
+    --color-input-border: #a0b3c1;
+    --color-input-border-focus: #80b6d5;
+    --breakpoint-xs: 1.17rem; /* 14pt */
+    --breakpoint-sm: 1.33rem; /* 16pt */
+    --breakpoint-base: 1.67rem; /* 20pt */
+    --breakpoint-lg: 1.92rem; /* 23pt */
+    --breakpoint-xl: 2.08rem; /* 25pt */
+    --breakpoint-2xl: 2.75rem; /* 33pt */
+    --breakpoint-3xl: 3.08rem; /* 37pt */
+    --breakpoint-4xl: 3.33rem; /* 40pt */
+    --transition: all 3s ease;
 }
 
 #root {

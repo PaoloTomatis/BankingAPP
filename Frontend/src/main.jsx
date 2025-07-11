@@ -15,9 +15,8 @@ import Page404 from './pages/Page404';
 import './main.css';
 
 // Creazione router
-router = createBrowserRouter([
+const router = createBrowserRouter([
     { path: '/', element: <Dashboard /> },
-    { path: '/home', element: <Dashboard /> },
     { path: '/dashboard', element: <Dashboard /> },
     { path: '/credits', element: <Credits /> },
     { path: '/login', element: <Login /> },
