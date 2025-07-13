@@ -72,6 +72,10 @@ a {
     --color-border: #a0b3c1;
     --color-input-border: #a0b3c1;
     --color-input-border-focus: #80b6d5;
+    --color-info: #2196f3;
+    --color-error: #f44336;
+    --color-warning: #ffc107;
+    --color-success: #4caf50;
     --breakpoint-xs: 1.17rem; /* 14pt */
     --breakpoint-sm: 1.33rem; /* 16pt */
     --breakpoint-base: 1.67rem; /* 20pt */
@@ -91,4 +95,6 @@ a {
     flex-direction: column;
     font-family: Inter, Arial, Helvetica, sans-serif;
     color: var(--primary-txt);
+    padding-top: 5vh;
+    gap: 20px;
 }

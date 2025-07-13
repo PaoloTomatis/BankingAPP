@@ -18,6 +18,7 @@ import './main.css';
 const router = createBrowserRouter([
     { path: '/', element: <Dashboard /> },
     { path: '/dashboard', element: <Dashboard /> },
+    { path: '/dashboard/:id', element: <Dashboard /> },
     { path: '/credits', element: <Credits /> },
     { path: '/login', element: <Login /> },
     { path: '/signup', element: <Signup /> },

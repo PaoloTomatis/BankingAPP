@@ -4,9 +4,9 @@
 // Importazione stile
 
 // Creazione componente
-const Tag = () => {
-    return <></>;
+const Spinner = () => {
+    return <>Caricamento...</>;
 };
 
 // Esportazione componente
-export default Tag;
+export default Spinner;
