@@ -12,20 +12,20 @@ const Dashboard = () => {
     const { id } = useParams();
 
     // Funzione gestione creazione portafoglio
-    const handleInput = (value, setValue) => {
+    const handlerInput = (value, setValue) => {
         const sanitizedValue = value.replace(/\s+/g, '');
 
-        // Controllo input
+        // Controllo value
         if (
             sanitizedValue &&
             sanitizedValue?.length >= 3 &&
             sanitizedValue?.length <= 30
         ) {
-            // Gestione input
+            // Gestione value
             //TODO - Faccio richiesta aggiunta portafoglio
             console.log('Aggiunta: ', value);
             // Cancello testo
-            setValue('');
+            setValue('Nuovo Portafoglio');
         } else if (sanitizedValue?.length < 3 || sanitizedValue?.length > 30) {
             // Gestione errore
             //TODO - Invio notifica di errore
@@ -35,16 +35,33 @@ const Dashboard = () => {
         }
     };
 
+    const handlerInputError = (value, setError) => {
+        // Sanificazione value
+        const sanitizedInput = value.trim();
+
+        // Controllo value
+        if (sanitizedInput?.length > 30 || sanitizedInput?.length < 3) {
+            // Impostazione errore
+            setError(
+                'Errore! Il nome deve essere compreso tra i 3 e i 30 caratteri'
+            );
+        } else {
+            // Eliminazione errore
+            setError(null);
+        }
+    };
+
     return (
         <>
             {id ? (
-                {id}
+                ciao
             ) : (
                 <>
                     <Input
                         placeHolder={'Inserisci nome del Portafoglio'}
                         icon={addImgBLK}
-                        action={handleInput}
+                        addHandler={handlerInput}
+                        errorHandler={handlerInputError}
                     />
                     <WalletsCont />
                 </>

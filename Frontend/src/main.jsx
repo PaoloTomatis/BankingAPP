@@ -2,6 +2,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { NotificationProvider } from './hooks/Notification.context';
 // Importazione pagine
 import Dashboard from './pages/Dashboard';
 import Credits from './pages/Credits';
@@ -31,6 +32,8 @@ const router = createBrowserRouter([
 // Caricamento router
 createRoot(document.getElementById('root')).render(
     <StrictMode>
-        <RouterProvider router={router} />
+        <NotificationProvider>
+            <RouterProvider router={router} />
+        </NotificationProvider>
     </StrictMode>
 );

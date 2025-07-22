@@ -24,7 +24,7 @@ const WalletsCont = () => {
                     { id: 3, name: 'Portafoglio 3' },
                 ]);
                 setLoading(false);
-            }, 3000);
+            }, 1000);
         } catch (error) {
             //TODO - Invio notifica errore
             setError(error);

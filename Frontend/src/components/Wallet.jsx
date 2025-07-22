@@ -1,5 +1,7 @@
 // Importazione moduli
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useNotification } from '../hooks/Notification.context';
 // Importazione immagini
 import modifyImgBLK from '../assets/icons/pen-BLK.png';
 import deleteImgBLK from '../assets/icons/delete-BLK.png';
@@ -8,6 +10,10 @@ import addImgBLK from '../assets/icons/add-BLK.png';
 
 // Creazione componente
 const Wallet = ({ id, name }) => {
+    // Notificatore
+    const notify = useNotification();
+    // Navigatore
+    const navigator = useNavigate();
     // Stato input
     const [input, setInput] = useState(name);
     // Stato modifica
@@ -53,7 +59,10 @@ const Wallet = ({ id, name }) => {
         // Controllo nome portafoglio
         if (!error && currentWallet.name !== input) {
             //TODO - Faccio richiesta modifica portafoglio
-            console.log('Modificato portafoglio: ', id);
+            notify(
+                'success',
+                'Il portafoglio è stato modificato correttamente!'
+            );
             // Aggiornamento portafoglio
             setCurrentWallet({ ...currentWallet, name: input });
         } else {
@@ -81,7 +90,7 @@ const Wallet = ({ id, name }) => {
                 {modify ? (
                     <input
                         type="text"
-                        className={`min-h-[38px] w-70 pr-15 pl-3 pt-1 pb-1 border-[3px] rounded-2xl bg-secondary-bg ${
+                        className={`min-h-[38px] w-[282px] pr-15 pl-3 pt-1 pb-1 border-[3px] rounded-2xl bg-secondary-bg ${
                             error ? 'border-error' : 'border-border'
                         } focus:${
                             error ? 'border-error' : 'border-border'
@@ -102,8 +111,8 @@ const Wallet = ({ id, name }) => {
                     />
                 ) : (
                     <div
-                        className="min-h-[38px] w-70 pr-10 pl-3 pt-1 pb-1 border-[3px] border-border rounded-2xl bg-secondary-bg flex items-center cursor-pointer"
-                        onDoubleClick={() => handleSwitch(true)}
+                        className="min-h-[38px] w-[282px] pr-10 pl-3 pt-1 pb-1 border-[3px] border-border rounded-2xl bg-secondary-bg cursor-pointer"
+                        onClick={() => navigator(`/dashboard/${id}`)}
                     >
                         {currentWallet.name}
                     </div>
@@ -125,7 +134,7 @@ const Wallet = ({ id, name }) => {
                     alt="icon"
                     className={
                         modify
-                            ? 'absolute bottom-1/2 w-5 aspect-square object-cover right-3 translate-y-1/2 cursor-pointer rotate-z-[45deg]'
+                            ? 'absolute bottom-1/2 w-5 aspect-square object-cover right-3 translate-y-1/2 cursor-pointer rotate-[45deg]'
                             : 'absolute bottom-1/2 w-5 aspect-square object-cover right-3 translate-y-1/2 cursor-pointer'
                     }
                     onMouseDown={(e) => e.preventDefault()}
