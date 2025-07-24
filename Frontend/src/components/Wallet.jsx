@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../hooks/Notification.context';
+import { usePopup } from '../hooks/Popup.context';
 // Importazione immagini
 import modifyImgBLK from '../assets/icons/pen-BLK.png';
 import deleteImgBLK from '../assets/icons/delete-BLK.png';
@@ -12,6 +13,8 @@ import addImgBLK from '../assets/icons/add-BLK.png';
 const Wallet = ({ id, name }) => {
     // Notificatore
     const notify = useNotification();
+    // Poppuper
+    const popup = usePopup();
     // Navigatore
     const navigator = useNavigate();
     // Stato input
@@ -49,9 +52,13 @@ const Wallet = ({ id, name }) => {
 
     // Funzione gestione eliminazione portafoglio
     const handleDelete = () => {
-        //TODO - Utilizzo popup
+        popup(
+            'Conferma ELIMINAZIONE',
+            "Eliminando il PORTAFOGLIO non sarà più possibile utilizzarlo e tutte le sue transazioni saranno anch'esse irrecuperabili. Quest'azione è irreversibile!",
+            'Procedi',
+            () => console.log('Eliminato portafoglio: ', id)
+        );
         //TODO - Faccio richiesta eliminazione portafoglio
-        console.log('Eliminato portafoglio: ', id);
     };
 
     // Funzione gestione modifica portafoglio

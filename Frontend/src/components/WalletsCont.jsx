@@ -1,11 +1,14 @@
 // Importazione moduli
 import { useState, useEffect } from 'react';
+import { useNotification } from '../hooks/Notification.context';
 // Importazione componenti
 import Wallet from '../components/Wallet';
 import Spinner from './Spinner';
 
 // Creazione pagina
 const WalletsCont = () => {
+    // Notificatore
+    const notify = useNotification();
     // Stato portafogli
     const [wallets, setWallets] = useState([]);
     // Stato caricamento
@@ -23,17 +26,18 @@ const WalletsCont = () => {
                     { id: 2, name: 'Portafoglio 2' },
                     { id: 3, name: 'Portafoglio 3' },
                 ]);
-                setLoading(false);
             }, 1000);
         } catch (error) {
-            //TODO - Invio notifica errore
-            setError(error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
         }
     }, []);
 
     // Controllo errore
     useEffect(() => {
         if (error) {
+            notify('error', error);
             console.log(error);
         }
     }, [error]);

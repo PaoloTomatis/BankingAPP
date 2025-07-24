@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { NotificationProvider } from './hooks/Notification.context';
+import { PopupProvider } from './hooks/Popup.context';
 // Importazione pagine
 import Dashboard from './pages/Dashboard';
 import Credits from './pages/Credits';
@@ -33,7 +34,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <NotificationProvider>
-            <RouterProvider router={router} />
+            <PopupProvider>
+                <RouterProvider router={router} />
+            </PopupProvider>
         </NotificationProvider>
     </StrictMode>
 );

@@ -1,6 +1,8 @@
+// npx tailwindcss -i ./src/input.css -o ./src/main.css --watch
 // Importazione moduli
 import { useParams } from 'react-router-dom';
 // Importazione componenti
+import Navbar from '../components/Navbar';
 import Input from '../components/Input';
 import WalletsCont from '../components/WalletsCont';
 // Importazione immagini
@@ -35,6 +37,7 @@ const Dashboard = () => {
         }
     };
 
+    // Funzione gestione errori
     const handlerInputError = (value, setError) => {
         // Sanificazione value
         const sanitizedInput = value.trim();
@@ -54,7 +57,7 @@ const Dashboard = () => {
     return (
         <>
             {id ? (
-                ciao
+                <Navbar />
             ) : (
                 <>
                     <Input
@@ -64,6 +67,7 @@ const Dashboard = () => {
                         errorHandler={handlerInputError}
                     />
                     <WalletsCont />
+                    <Navbar />
                 </>
             )}
         </>
