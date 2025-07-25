@@ -16,14 +16,14 @@ const NotificationProvider = ({ children }) => {
     // Stato visibilità notifica
     const [notificationShow, setNotificationShow] = useState(false);
 
-    // useEffect(() => {
-    //     if (notificationShow) {
-    //         const idTimeout = setTimeout(() => {
-    //             setNotificationShow(false);
-    //         }, 4000);
-    //         return () => clearTimeout(idTimeout);
-    //     }
-    // }, [notificationShow]);
+    useEffect(() => {
+        if (notificationShow) {
+            const idTimeout = setTimeout(() => {
+                setNotificationShow(false);
+            }, 4000);
+            return () => clearTimeout(idTimeout);
+        }
+    }, [notificationShow]);
 
     // Funzione invio notifica
     const notify = (type, desc, title) => {

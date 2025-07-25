@@ -4,7 +4,8 @@ import { useParams } from 'react-router-dom';
 // Importazione componenti
 import Navbar from '../components/Navbar';
 import Input from '../components/Input';
-import WalletsCont from '../components/WalletsCont';
+import WalletsSection from '../sections/WalletsSection';
+import DashboardSection from '../sections/DashboardSection';
 // Importazione immagini
 import addImgBLK from '../assets/icons/add-BLK.png';
 
@@ -57,7 +58,10 @@ const Dashboard = () => {
     return (
         <>
             {id ? (
-                <Navbar />
+                <>
+                    <DashboardSection id={id} />
+                    <Navbar />
+                </>
             ) : (
                 <>
                     <Input
@@ -66,7 +70,7 @@ const Dashboard = () => {
                         addHandler={handlerInput}
                         errorHandler={handlerInputError}
                     />
-                    <WalletsCont />
+                    <WalletsSection />
                     <Navbar />
                 </>
             )}

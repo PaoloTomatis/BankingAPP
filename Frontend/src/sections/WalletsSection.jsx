@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import { useNotification } from '../hooks/Notification.context';
 // Importazione componenti
 import Wallet from '../components/Wallet';
-import Spinner from './Spinner';
+import Spinner from '../components/Spinner';
 
 // Creazione pagina
-const WalletsCont = () => {
+const WalletsSection = () => {
     // Notificatore
     const notify = useNotification();
     // Stato portafogli
@@ -26,11 +26,12 @@ const WalletsCont = () => {
                     { id: 2, name: 'Portafoglio 2' },
                     { id: 3, name: 'Portafoglio 3' },
                 ]);
+                setLoading(false);
             }, 1000);
         } catch (error) {
             setError(error.message);
         } finally {
-            setLoading(false);
+            // setLoading(false);
         }
     }, []);
 
@@ -64,4 +65,4 @@ const WalletsCont = () => {
 };
 
 // Esportazione pagina
-export default WalletsCont;
+export default WalletsSection;

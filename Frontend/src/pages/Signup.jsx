@@ -1,11 +1,16 @@
 // Importazione moduli
-// Importazione componenti
+// Importazione componentiù
+import Navbar from '../components/Navbar';
 // Importazione immagini
 // Importazione stile
 
 // Creazione pagina
 const Signup = () => {
-    return <></>;
+    return (
+        <>
+            <Navbar />
+        </>
+    );
 };
 
 // Esportazione pagina

@@ -1,11 +1,16 @@
 // Importazione moduli
 // Importazione componenti
+import Navbar from '../components/Navbar';
 // Importazione immagini
 // Importazione stile
 
 // Creazione pagina
 const Login = () => {
-    return <></>;
+    return (
+        <>
+            <Navbar />
+        </>
+    );
 };
 
 // Esportazione pagina

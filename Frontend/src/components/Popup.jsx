@@ -8,7 +8,7 @@ import closeImg from '../assets/icons/add-BLK.png';
 const Popup = ({ title, desc, action, btnTxt, setShow }) => {
     return (
         <div className="flex w-screen h-screen bg-black/60 items-center justify-center fixed top-0 left-0 z-40">
-            <div className="flex flex-col w-[95%] max-w-[500px] rounded-2xl gap-3 relative bg-primary-bg z-40 border-border border-[3px] p-3">
+            <div className="flex flex-col w-[95%] max-w-[500px] rounded-2xl gap-3 relative bg-primary-bg z-40 border-border border-[3px] p-3 items-center">
                 <h3 className="text-error text-xlarge">{title}</h3>
                 <p className="text-primary-txt text-normal">{desc}</p>
                 <Button

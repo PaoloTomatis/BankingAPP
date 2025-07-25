@@ -10,7 +10,7 @@ const Button = ({ children, action, url, type }) => {
         return (
             <Link
                 to={url}
-                className={`rounded-2xl border-2 border-black w-fit p-2 ${
+                className={`rounded-2xl border-2 border-black w-fit pl-2 pr-2 pb-1 pt-1 ${
                     type == 'warning'
                         ? 'text-white bg-error'
                         : 'text-primary-txt bg-primary-btn'
@@ -24,7 +24,7 @@ const Button = ({ children, action, url, type }) => {
     return (
         <button
             onClick={action}
-            className={`rounded-2xl border-2 border-black w-fit ${
+            className={`rounded-2xl border-2 border-black w-fit pl-2 pr-2 pb-1 pt-1 ${
                 type == 'warning'
                     ? 'text-white bg-error'
                     : 'text-primary-txt bg-primary-btn'

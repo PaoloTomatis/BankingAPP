@@ -54,11 +54,11 @@ const Wallet = ({ id, name }) => {
     const handleDelete = () => {
         popup(
             'Conferma ELIMINAZIONE',
-            "Eliminando il PORTAFOGLIO non sarà più possibile utilizzarlo e tutte le sue transazioni saranno anch'esse irrecuperabili. Quest'azione è irreversibile!",
+            `Eliminando "${name.toUpperCase()}" non sarà più possibile utilizzarlo e tutte le sue transazioni saranno anch'esse irrecuperabili. Quest'azione è irreversibile!`,
             'Procedi',
+            //TODO - Faccio richiesta eliminazione portafoglio
             () => console.log('Eliminato portafoglio: ', id)
         );
-        //TODO - Faccio richiesta eliminazione portafoglio
     };
 
     // Funzione gestione modifica portafoglio

@@ -9,7 +9,7 @@ const Notification = ({ type = 'success', title, desc, show, setShow }) => {
     return (
         <div
             className={`flex min-h-[15vh] gap-0.5 fixed bottom-0 left-0 w-screen justify-between items-center pr-10 pl-10 bg-secondary-bg border-[#000] border-t-[2px] transition-all duration-[300ms] ease z-50 ${
-                show ? 'translate-x-0' : 'translate-x-[-100%]'
+                show ? 'translate-y-0' : 'translate-y-[100%]'
             }`}
         >
             <div
