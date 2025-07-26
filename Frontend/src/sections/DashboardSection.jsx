@@ -1,9 +1,11 @@
 // Importazione moduli
 import { useState, useEffect, useRef } from 'react';
 import { useNotification } from '../hooks/Notification.context';
+import { formatCurrency, formatCurrencyColor } from '../utils/utils';
 // Importazione componenti
 import Card from '../components/Card';
 import Spinner from '../components/Spinner';
+import Transaction from '../components/Transaction';
 
 // Creazione pagina
 const DashboardSection = () => {
@@ -13,8 +15,12 @@ const DashboardSection = () => {
     const [balance, setBalance] = useState(null);
     // Stato bilancio mensile
     const [monthBalance, setMonthBalance] = useState(null);
-    // Stato transazioni mensili
+    // Variabile transazioni mensili
     const monthTransactions = useRef([]);
+    // Stato ultime transazioni
+    const [transactions, setTransactions] = useState([]);
+    // Stato tag
+    const [tags, setTags] = useState([]);
     // Stato caricamento
     const [loading, setLoading] = useState(true);
     // Stato errore
@@ -35,8 +41,6 @@ const DashboardSection = () => {
                     { id: 6, amount: 100, type: 'expense' },
                     { id: 7, amount: 100, type: 'expense' },
                     { id: 8, amount: 100, type: 'expense' },
-                    // { id: 9, amount: 100, type: 'expense' },
-                    // { id: 10, amount: 100, type: 'expense' },
                 ];
                 let currentMonthBalance = 0;
                 let currentMonthIncome = 0;
@@ -55,6 +59,34 @@ const DashboardSection = () => {
                     income: currentMonthIncome,
                     expense: currentMonthExpense,
                 });
+                setTransactions([
+                    {
+                        id: 1,
+                        amount: 100,
+                        type: 'income',
+                        tag_id: 1,
+                        date: '24/07/2025',
+                    },
+                    {
+                        id: 7,
+                        amount: 100,
+                        type: 'expense',
+                        tag_id: 3,
+                        date: '25/07/2025',
+                    },
+                    {
+                        id: 8,
+                        amount: 100,
+                        type: 'expense',
+                        tag_id: 2,
+                        date: '26/07/2025',
+                    },
+                ]);
+                setTags([
+                    { id: 1, color: '#F44336' },
+                    { id: 2, color: '#FFC107' },
+                    { id: 3, color: '#3A7CD9' },
+                ]);
                 setLoading(false);
             }, 1000);
         } catch (error) {
@@ -63,29 +95,6 @@ const DashboardSection = () => {
             // setLoading(false);
         }
     }, []);
-
-    // Formattazione bilancio
-    const formatCurrency = (value) => {
-        const formattedValue = new Intl.NumberFormat('it-IT', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Math.abs(value));
-
-        return value > 0
-            ? `+${formattedValue}`
-            : value < 0
-            ? `-${formattedValue}`
-            : formattedValue;
-    };
-
-    // Formattazione colore
-    const formatCurrencyColor = (value) => {
-        return value > 0
-            ? 'text-success'
-            : value < 0
-            ? 'text-error'
-            : 'text-warning';
-    };
 
     // Controllo errore
     useEffect(() => {
@@ -143,6 +152,31 @@ const DashboardSection = () => {
                                 >
                                     {formatCurrency(monthBalance.balance)}
                                 </p>
+                            </div>
+                        </Card>
+                        <Card title={'Ultime Transazioni🔁'}>
+                            <div className="flex flex-col items-center gap-5 w-full p-4">
+                                {transactions.map((transaction) => {
+                                    return (
+                                        <Transaction
+                                            key={transaction.id}
+                                            id={transaction.id}
+                                            amount={transaction.amount}
+                                            type={transaction.type}
+                                            date={transaction.date}
+                                            tagColor={
+                                                tags[
+                                                    tags.findIndex(
+                                                        (tag) =>
+                                                            tag.id ===
+                                                            transaction.tag_id
+                                                    )
+                                                ]?.color || '#000000'
+                                            }
+                                            actionBtn={true}
+                                        />
+                                    );
+                                })}
                             </div>
                         </Card>
                     </>

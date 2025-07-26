@@ -26,6 +26,7 @@ const router = createBrowserRouter([
     { path: '/signup', element: <Signup /> },
     { path: '/tags', element: <Tags /> },
     { path: '/transactions', element: <Transactions /> },
+    { path: '/transactions/:id', element: <Transactions /> },
     { path: '/account', element: <Account /> },
     { path: '*', element: <Page404 /> },
 ]);
