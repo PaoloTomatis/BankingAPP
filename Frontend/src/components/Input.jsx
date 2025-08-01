@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react';
 
 // Creazione componente
 const Input = ({
+    type = 'text',
     placeHolder,
     icon,
     addHandler,
     errorHandler,
-    className,
+    className = '',
     disableOnError = true,
     defValue = '',
 }) => {
@@ -19,20 +20,13 @@ const Input = ({
     // Gestione errori
     useEffect(() => errorHandler(input, setError), [input]);
 
-    // Controllo errore
-    useEffect(() => {
-        if (error) {
-            console.log(error);
-        }
-    }, [error]);
-
     return (
         <>
             <div
                 className={`${className} flex relative flex-col items-center mb-3`}
             >
                 <input
-                    type="text"
+                    type={type}
                     placeholder={placeHolder}
                     className={`min-h-[38px] w-[282px] pr-10 pl-3 pt-1 pb-1 border-border border-[3px] rounded-2xl ${
                         error ? 'border-error' : 'border-border'
@@ -42,7 +36,9 @@ const Input = ({
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) =>
-                        e.key == 'Enter' && addHandler(input, setInput)
+                        e.key == 'Enter' && addHandler
+                            ? addHandler(input, setInput)
+                            : null
                     }
                 />
                 {icon ? (
@@ -54,7 +50,9 @@ const Input = ({
                                 ? 'opacity-50 cursor-not-allowed'
                                 : 'cursor-pointer'
                         }`}
-                        onClick={() => addHandler(input, setInput)}
+                        onClick={() =>
+                            addHandler ? addHandler(input, setInput) : null
+                        }
                     />
                 ) : null}
                 {error ? (

@@ -4,7 +4,7 @@
 // Importazione stile
 
 // Creazione componente
-const Card = ({ className, title, children }) => {
+const Card = ({ className = '', title, children }) => {
     return (
         <div
             className={`${className} flex flex-col w-[95%] max-w-[400px] rounded-2xl border-border border-[3px] items-center`}

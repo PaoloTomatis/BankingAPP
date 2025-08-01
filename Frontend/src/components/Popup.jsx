@@ -13,7 +13,7 @@ const Popup = ({ title, desc, action, btnTxt, setShow }) => {
                 <p className="text-primary-txt text-normal">{desc}</p>
                 <Button
                     type={'warning'}
-                    action={() => {
+                    onClick={() => {
                         action();
                         setShow(false);
                     }}
