@@ -1,5 +1,5 @@
 // Importazione moduli
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatCurrency, formatCurrencyColor } from '../utils/utils';
 // Importazione componenti
 // Importazione immagini
@@ -16,6 +16,9 @@ const Transaction = ({
     date,
     actionBtn = false,
 }) => {
+    // Navigatore
+    const navigator = useNavigate();
+
     return (
         <Link
             to={`/transactions/${id}`}
@@ -42,6 +45,7 @@ const Transaction = ({
                         alt="elimina"
                         role="button"
                         className="aspect-square w-6 h-6 object-cover"
+                        onClick={() => navigator(`/transactions/${id}`)}
                     />
                 </div>
             ) : null}

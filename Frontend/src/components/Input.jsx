@@ -2,9 +2,17 @@
 import { useState, useEffect } from 'react';
 
 // Creazione componente
-const Input = ({ placeHolder, icon, addHandler, errorHandler }) => {
+const Input = ({
+    placeHolder,
+    icon,
+    addHandler,
+    errorHandler,
+    className,
+    disableOnError = true,
+    defValue = '',
+}) => {
     // Stato input
-    const [input, setInput] = useState('Nuovo Portafoglio');
+    const [input, setInput] = useState(defValue);
     // Stato errore
     const [error, setError] = useState(null);
 
@@ -20,7 +28,9 @@ const Input = ({ placeHolder, icon, addHandler, errorHandler }) => {
 
     return (
         <>
-            <div className="flex relative">
+            <div
+                className={`${className} flex relative flex-col items-center mb-3`}
+            >
                 <input
                     type="text"
                     placeholder={placeHolder}
@@ -40,15 +50,18 @@ const Input = ({ placeHolder, icon, addHandler, errorHandler }) => {
                         src={icon}
                         alt="icon"
                         className={`absolute bottom-1/2 w-5 aspect-square object-cover right-3 translate-y-1/2 ${
-                            error
+                            error && disableOnError
                                 ? 'opacity-50 cursor-not-allowed'
                                 : 'cursor-pointer'
                         }`}
                         onClick={() => addHandler(input, setInput)}
                     />
-                ) : (
-                    ''
-                )}
+                ) : null}
+                {error ? (
+                    <p className="absolute bottom-[-15px] text-xsmall text-error">
+                        {error}
+                    </p>
+                ) : null}
             </div>
         </>
     );

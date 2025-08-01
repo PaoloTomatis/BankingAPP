@@ -7,7 +7,7 @@ import { PopupProvider } from './hooks/Popup.context';
 // Importazione pagine
 import Dashboard from './pages/Dashboard';
 import Credits from './pages/Credits';
-import Login from './pages/Login';
+import Auth from './pages/Auth';
 import Signup from './pages/Signup';
 import Tags from './pages/Tags';
 import Transactions from './pages/Transactions';
@@ -22,7 +22,8 @@ const router = createBrowserRouter([
     { path: '/dashboard', element: <Dashboard /> },
     { path: '/dashboard/:id', element: <Dashboard /> },
     { path: '/credits', element: <Credits /> },
-    { path: '/login', element: <Login /> },
+    { path: '/auth', element: <Auth /> },
+    { path: '/auth/:type', element: <Auth /> },
     { path: '/signup', element: <Signup /> },
     { path: '/tags', element: <Tags /> },
     { path: '/transactions', element: <Transactions /> },
