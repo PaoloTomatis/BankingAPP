@@ -1,4 +1,3 @@
-// Importazione moduli
 // Importazione componenti
 import Input from '../components/Input';
 import WalletsSection from '../sections/WalletsSection';
@@ -8,7 +7,7 @@ import addImgBLK from '../assets/icons/add-BLK.png';
 // Creazione pagina
 const DashboardSection1 = () => {
     // Funzione gestione creazione portafoglio
-    const handlerInput = (value, setValue) => {
+    const handlerInput = (value, setValue, setError) => {
         const sanitizedValue = value.replace(/\s+/g, '');
 
         // Controllo value
@@ -24,10 +23,7 @@ const DashboardSection1 = () => {
             setValue('Nuovo Portafoglio');
         } else if (sanitizedValue?.length < 3 || sanitizedValue?.length > 30) {
             // Gestione errore
-            //TODO - Invio notifica di errore
-            console.log(
-                'Errore! Il nome deve essere compreso tra i 3 e i 30 caratteri'
-            );
+            setError('Il nome deve essere compreso tra i 3 e i 30 caratteri');
         }
     };
 
@@ -39,9 +35,7 @@ const DashboardSection1 = () => {
         // Controllo value
         if (sanitizedInput?.length > 30 || sanitizedInput?.length < 3) {
             // Impostazione errore
-            setError(
-                'Errore! Il nome deve essere compreso tra i 3 e i 30 caratteri'
-            );
+            setError('Il nome deve essere compreso tra i 3 e i 30 caratteri');
         } else {
             // Eliminazione errore
             setError(null);
@@ -55,7 +49,7 @@ const DashboardSection1 = () => {
                 placeHolder={'Inserisci nome del Portafoglio'}
                 icon={addImgBLK}
                 addHandler={handlerInput}
-                errorHandler={handlerInputError}
+                errorHandler={null}
                 defValue="Nuovo Portafoglio"
             />
             <WalletsSection />

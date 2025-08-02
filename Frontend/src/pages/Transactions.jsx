@@ -1,6 +1,7 @@
 // Importazione moduli
 // Importazione componenti
 import Navbar from '../components/Navbar';
+import Button from '../components/Button';
 // Importazione immagini
 // Importazione stile
 
@@ -8,6 +9,8 @@ import Navbar from '../components/Navbar';
 const Transactions = () => {
     return (
         <>
+            <Button className="mt-[5vh]">Storico ⌚</Button>
+            <Button>Ricorrenti 🔁</Button>
             <Navbar />
         </>
     );

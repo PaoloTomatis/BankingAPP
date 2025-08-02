@@ -71,6 +71,7 @@ const Navbar = () => {
                                 }`}
                                 src={page.condition ? page.imgBLK : page.imgWHT}
                                 alt={page.name ? page.name.toLowerCase() : null}
+                                loading="lazy"
                             />
                             <p className="text-small text-primary-txt">
                                 {page.name}

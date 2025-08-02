@@ -2,8 +2,10 @@
 import { useNotification } from '../hooks/Notification.context';
 // Importazione componenti
 import Navbar from '../components/Navbar';
+import Input from '../components/Input';
+import TagsSection from '../sections/TagsSection';
 // Importazione immagini
-// Importazione stile
+import addImgBLK from '../assets/icons/add-BLK.png';
 
 // Creazione pagina
 const Tags = () => {
@@ -11,7 +13,7 @@ const Tags = () => {
     const notify = useNotification();
 
     // Funzione gestione creazione tag
-    const handlerInput = (value, setValue) => {
+    const handlerInput = (value, setValue, setError) => {
         const sanitizedValue = value.replace(/\s+/g, '');
 
         // Controllo value
@@ -27,10 +29,7 @@ const Tags = () => {
             setValue('Nuovo Tag');
         } else if (sanitizedValue?.length < 3 || sanitizedValue?.length > 30) {
             // Gestione errore
-            //TODO - Invio notifica di errore
-            console.log(
-                'Errore! Il nome deve essere compreso tra i 3 e i 30 caratteri'
-            );
+            setError('Il nome deve essere compreso tra i 3 e i 30 caratteri');
         }
     };
 
@@ -42,9 +41,7 @@ const Tags = () => {
         // Controllo value
         if (sanitizedInput?.length > 30 || sanitizedInput?.length < 3) {
             // Impostazione errore
-            setError(
-                'Errore! Il nome deve essere compreso tra i 3 e i 30 caratteri'
-            );
+            setError('Il nome deve essere compreso tra i 3 e i 30 caratteri');
         } else {
             // Eliminazione errore
             setError(null);
@@ -55,12 +52,13 @@ const Tags = () => {
         <>
             <Input
                 className={'mt-[5vh]'}
-                placeHolder={'Inserisci nome del Portafoglio'}
+                placeHolder={'Inserisci nome del Tag'}
                 icon={addImgBLK}
                 addHandler={handlerInput}
-                errorHandler={handlerInputError}
-                defValue="Nuovo Portafoglio"
+                errorHandler={null}
+                defValue="Nuovo Tag"
             />
+            <TagsSection />
             <Navbar />
         </>
     );

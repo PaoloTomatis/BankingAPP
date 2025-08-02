@@ -18,7 +18,11 @@ const Input = ({
     const [error, setError] = useState(null);
 
     // Gestione errori
-    useEffect(() => errorHandler(input, setError), [input]);
+    useEffect(() => {
+        if (errorHandler) {
+            errorHandler(input, setError);
+        }
+    }, [input]);
 
     return (
         <>
@@ -34,10 +38,15 @@ const Input = ({
                         error ? 'border-error' : 'border-border'
                     } outline-none`}
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={(e) => {
+                        if (error) {
+                            setError(null);
+                        }
+                        setInput(e.target.value);
+                    }}
                     onKeyDown={(e) =>
                         e.key == 'Enter' && addHandler
-                            ? addHandler(input, setInput)
+                            ? addHandler(input, setInput, setError)
                             : null
                     }
                 />
