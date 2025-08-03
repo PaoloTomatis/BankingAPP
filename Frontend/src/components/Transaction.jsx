@@ -21,7 +21,7 @@ const Transaction = ({
 
     return (
         <Link
-            to={`/transactions/${id}`}
+            to={`/transactions-history/${id}`}
             className="flex items-center w-full border-border border-[3px] rounded-2xl justify-between p-2"
         >
             <p className={`text-normal ${formatCurrencyColor(amount, type)}`}>
@@ -39,13 +39,13 @@ const Transaction = ({
                         alt="modifica"
                         role="button"
                         className="aspect-square w-6 h-6 object-cover"
+                        onClick={() => navigator(`/transactions-history/${id}`)}
                     />
                     <img
                         src={deleteImg}
                         alt="elimina"
                         role="button"
                         className="aspect-square w-6 h-6 object-cover"
-                        onClick={() => navigator(`/transactions/${id}`)}
                     />
                 </div>
             ) : null}

@@ -11,6 +11,7 @@ const Input = ({
     className = '',
     disableOnError = true,
     defValue = '',
+    step,
 }) => {
     // Stato input
     const [input, setInput] = useState(defValue);
@@ -31,6 +32,7 @@ const Input = ({
             >
                 <input
                     type={type}
+                    step={step || null}
                     placeholder={placeHolder}
                     className={`min-h-[38px] w-[282px] pr-10 pl-3 pt-1 pb-1 border-border border-[3px] rounded-2xl ${
                         error ? 'border-error' : 'border-border'

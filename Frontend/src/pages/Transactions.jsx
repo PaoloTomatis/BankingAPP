@@ -9,8 +9,10 @@ import Button from '../components/Button';
 const Transactions = () => {
     return (
         <>
-            <Button className="mt-[5vh]">Storico ⌚</Button>
-            <Button>Ricorrenti 🔁</Button>
+            <Button url={'/transactions-history'} className="mt-[5vh]">
+                Storico ⌚
+            </Button>
+            <Button url={'/transactions-recurrent'}>Ricorrenti 🔁</Button>
             <Navbar />
         </>
     );

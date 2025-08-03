@@ -11,6 +11,8 @@ import Auth from './pages/Auth';
 import Signup from './pages/Signup';
 import Tags from './pages/Tags';
 import Transactions from './pages/Transactions';
+import TransactionsHistory from './pages/TransactionsHistory';
+import TransactionsRecurrent from './pages/TRansactionsRecurrent';
 import Account from './pages/Account';
 import Page404 from './pages/Page404';
 // Importazione stile
@@ -27,7 +29,9 @@ const router = createBrowserRouter([
     { path: '/signup', element: <Signup /> },
     { path: '/tags', element: <Tags /> },
     { path: '/transactions', element: <Transactions /> },
-    { path: '/transactions/:id', element: <Transactions /> },
+    { path: '/transactions-history/:id', element: <TransactionsHistory /> },
+    { path: '/transactions-history', element: <TransactionsHistory /> },
+    { path: '/transactions-recurrent', element: <TransactionsRecurrent /> },
     { path: '/account', element: <Account /> },
     { path: '*', element: <Page404 /> },
 ]);
