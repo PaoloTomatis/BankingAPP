@@ -1,5 +1,7 @@
 // Importazione moduli
 import { usePopup } from '../hooks/Popup.context';
+import { useNotification } from '../hooks/Notification.context';
+import { useNavigate } from 'react-router-dom';
 // Importazione componenti
 import Navbar from '../components/Navbar';
 import Button from '../components/Button';
@@ -13,6 +15,10 @@ const Account = () => {
     const account = { id: 1, username: 'Pollito0o0', email: 'pol@gmail.com' };
     // Popupper
     const popup = usePopup();
+    // Notificatore
+    const notify = useNotification();
+    // Navigatore
+    const navigator = useNavigate();
 
     // Funzione gestione logout
     const handleLogout = () => {
@@ -20,7 +26,13 @@ const Account = () => {
             'Conferma LOGOUT',
             'Continuando uscirai dal tuo account e sarà necessaria la riautenticazione per la visualizzazione dei tuoi dati!',
             'Procedi',
-            () => console.log('LOGOUT')
+            () => {
+                notify(
+                    'success',
+                    'Il Logout è stato effettuato correttamente!'
+                );
+                navigator('/auth/login');
+            }
         );
         //TODO - Richiesta logout da useAuth
     };
@@ -31,7 +43,10 @@ const Account = () => {
             'Conferma ELIMINAZIONE',
             "Eliminando il tuo ACCOUNT non sarà più possibile utilizzarlo e tutti i suoi dati verranno eliminati. Quest'azione è irreversibile!",
             'Procedi',
-            () => console.log('ELIMINAZIONE')
+            () => {
+                notify('success', "L'Account è stato eliminato correttamente!"),
+                    navigator('/auth/signup');
+            }
         );
         //TODO - Richiesta eliminazione da useAuth
     };

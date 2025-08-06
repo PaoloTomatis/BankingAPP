@@ -1,11 +1,12 @@
 // Importazione moduli
 // Importazione componenti
-import Navbar from '../components/Navbar';
 import Button from '../components/Button';
 // Importazione immagini
 
 // Creazione pagina
-const Transactions = () => {
+const Warning = () => {
+    sessionStorage.setItem('bannerShown', 'true');
+
     return (
         <>
             <Button url={'/transactions-history'} className="mt-[5vh]">
@@ -18,4 +19,4 @@ const Transactions = () => {
 };
 
 // Esportazione pagina
-export default Transactions;
+export default Warning;

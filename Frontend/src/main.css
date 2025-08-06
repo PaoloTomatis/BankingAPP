@@ -763,6 +763,14 @@ video {
   max-width: 2.5rem;
 }
 
+.max-w-\[100px\] {
+  max-width: 100px;
+}
+
+.max-w-\[200px\] {
+  max-width: 200px;
+}
+
 .max-w-\[300px\] {
   max-width: 300px;
 }
@@ -930,6 +938,11 @@ video {
   background-color: rgb(0 0 0 / 0.6);
 }
 
+.bg-components-bg {
+  --tw-bg-opacity: 1;
+  background-color: rgb(206 225 243 / var(--tw-bg-opacity, 1));
+}
+
 .bg-error {
   --tw-bg-opacity: 1;
   background-color: rgb(244 67 54 / var(--tw-bg-opacity, 1));
@@ -942,7 +955,7 @@ video {
 
 .bg-primary-bg {
   --tw-bg-opacity: 1;
-  background-color: rgb(206 225 243 / var(--tw-bg-opacity, 1));
+  background-color: rgb(223 235 246 / var(--tw-bg-opacity, 1));
 }
 
 .bg-primary-btn {
@@ -1173,6 +1186,10 @@ video {
   transition-duration: 300ms;
 }
 
+.\[-moz-appearance\:_textfield\] {
+  -moz-appearance: textfield;
+}
+
 /* ! Reset */
 
 body,
@@ -1236,4 +1253,22 @@ a {
   .lg\:flex-row {
     flex-direction: row;
   }
+}
+
+.\[\&\:\:-webkit-inner-spin-button\]\:m-0::-webkit-inner-spin-button {
+  margin: 0px;
+}
+
+.\[\&\:\:-webkit-inner-spin-button\]\:appearance-none::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+          appearance: none;
+}
+
+.\[\&\:\:-webkit-outer-spin-button\]\:m-0::-webkit-outer-spin-button {
+  margin: 0px;
+}
+
+.\[\&\:\:-webkit-outer-spin-button\]\:appearance-none::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+          appearance: none;
 }

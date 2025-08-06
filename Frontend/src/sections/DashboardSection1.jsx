@@ -27,21 +27,6 @@ const DashboardSection1 = () => {
         }
     };
 
-    // Funzione gestione errori
-    const handlerInputError = (value, setError) => {
-        // Sanificazione value
-        const sanitizedInput = value.trim();
-
-        // Controllo value
-        if (sanitizedInput?.length > 30 || sanitizedInput?.length < 3) {
-            // Impostazione errore
-            setError('Il nome deve essere compreso tra i 3 e i 30 caratteri');
-        } else {
-            // Eliminazione errore
-            setError(null);
-        }
-    };
-
     return (
         <>
             <Input
@@ -49,7 +34,6 @@ const DashboardSection1 = () => {
                 placeHolder={'Inserisci nome del Portafoglio'}
                 icon={addImgBLK}
                 addHandler={handlerInput}
-                errorHandler={null}
                 defValue="Nuovo Portafoglio"
             />
             <WalletsSection />

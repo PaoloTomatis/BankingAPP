@@ -26,7 +26,10 @@ const Navbar = () => {
             name: 'Home',
         },
         {
-            condition: currentPage == '/transactions',
+            condition:
+                currentPage == '/transactions' ||
+                currentPage == '/transactions-history' ||
+                currentPage == '/transactions-recurrent',
             url: '/transactions',
             imgBLK: transactionsImgBLK,
             imgWHT: transactionsImgWHT,
@@ -71,7 +74,7 @@ const Navbar = () => {
                                 }`}
                                 src={page.condition ? page.imgBLK : page.imgWHT}
                                 alt={page.name ? page.name.toLowerCase() : null}
-                                loading="lazy"
+                                fetchPriority="high"
                             />
                             <p className="text-small text-primary-txt">
                                 {page.name}

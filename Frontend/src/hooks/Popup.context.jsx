@@ -33,7 +33,6 @@ const PopupProvider = ({ children }) => {
                     desc={popup.desc}
                     action={popup.action}
                     btnTxt={popup.btnTxt}
-                    show={popupShow}
                     setShow={setPopupShow}
                 />
             ) : null}

@@ -62,7 +62,9 @@ const Input = ({
                                 : 'cursor-pointer'
                         }`}
                         onClick={() =>
-                            addHandler ? addHandler(input, setInput) : null
+                            addHandler
+                                ? addHandler(input, setInput, setError)
+                                : null
                         }
                     />
                 ) : null}

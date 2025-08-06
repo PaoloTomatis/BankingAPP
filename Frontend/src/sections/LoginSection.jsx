@@ -1,11 +1,18 @@
 // Importazione moduli
 import { Link } from 'react-router-dom';
+import { useNotification } from '../hooks/Notification.context';
+import { useNavigate } from 'react-router-dom';
 // Importazione componenti
 import Input from '../components/Input';
 import Button from '../components/Button';
 
 // Creazione sezione
 const LoginSection = () => {
+    // Navigatore
+    const navigator = useNavigate();
+    // Notificatore
+    const notify = useNotification();
+
     // Funzione gestione errori email
     const handlerEmailError = (value, setError) => {
         // Sanificazione value
@@ -63,16 +70,9 @@ const LoginSection = () => {
                 psw
             )
         ) {
+            psw = '';
             for (let i = 0; i < length; i++) {
                 psw += data[Math.floor(Math.random() * data.length)];
-            }
-
-            if (
-                !/^(?=[A-Za-z0-9!?. ,\-_@#]{8,255}$)(?=.*[0-9])(?=.*[!?. ,\-_@#])(?!.*[\s()])/.test(
-                    psw
-                )
-            ) {
-                psw = '';
             }
         }
 
@@ -80,9 +80,10 @@ const LoginSection = () => {
     };
 
     // Funzione autenticazione account
-    const handlerRegister = () => {
+    const handlerLogin = () => {
         // TODO Richiesta api di autenticazione
-        console.log('AUTENTICATO');
+        notify('success', 'Autenticazione effettuata correttamente!');
+        navigator('/dashboard');
     };
 
     return (
@@ -100,7 +101,7 @@ const LoginSection = () => {
                     defValue={() => pswGenerator(20)}
                     type="password"
                 />
-                <Button className="text-[#fff]" onClick={handlerRegister}>
+                <Button className="text-[#fff]" onClick={handlerLogin}>
                     Accedi
                 </Button>
                 <p className="text-small">

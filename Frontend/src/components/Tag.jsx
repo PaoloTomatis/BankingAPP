@@ -1,5 +1,5 @@
 // Importazione moduli
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNotification } from '../hooks/Notification.context';
 import { usePopup } from '../hooks/Popup.context';
 // Importazione immagini
@@ -28,9 +28,9 @@ const Tag = ({ id, name, color = '#000' }) => {
         //TODO - Faccio richiesta eliminazione portafoglio
         popup(
             'Conferma ELIMINAZIONE',
-            `Eliminando "${name.toUpperCase()}" non sarà più possibile utilizzarlo e tutte le sue transazioni saranno anch'esse irrecuperabili. Quest'azione è irreversibile!`,
+            `Eliminando il tag "${name.toUpperCase()}" non sarà più possibile utilizzarlo e tutte le transazioni che lo utilizzano rimarranno senza il medesimo. Quest'azione è irreversibile!`,
             'Procedi',
-            () => console.log('Eliminato portafoglio: ', id)
+            () => notify('success', 'Il Tag è stato eliminato correttamente!')
         );
     };
 
@@ -46,10 +46,7 @@ const Tag = ({ id, name, color = '#000' }) => {
             (currentTag.name !== input.name || currentTag.color !== input.color)
         ) {
             //TODO - Faccio richiesta modifica portafoglio
-            notify(
-                'success',
-                'Il portafoglio è stato modificato correttamente!'
-            );
+            notify('success', 'Il tag è stato modificato correttamente!');
             // Aggiornamento portafoglio
             setCurrentTag({ name: input.name, color: input.color });
         } else {
@@ -77,7 +74,7 @@ const Tag = ({ id, name, color = '#000' }) => {
     return (
         <>
             <div className="flex relative">
-                <div className="min-h-[38px] w-[282px] pr-10 pl-3 pt-1 pb-1 border-[3px] border-border rounded-2xl bg-secondary-bg cursor-pointer flex gap-3 items-center">
+                <div className="min-h-[38px] w-[282px] pr-10 pl-3 pt-1 pb-1 border-[3px] border-border rounded-2xl bg-components-bg cursor-pointer flex gap-3 items-center">
                     {modify ? (
                         <>
                             <input

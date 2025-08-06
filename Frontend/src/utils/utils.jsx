@@ -37,4 +37,42 @@ const formatCurrencyColor = (value, type = null) => {
         : 'text-warning';
 };
 
-export { formatCurrency, formatCurrencyColor };
+// Formattazione ricorrenza
+const formatRecurrency = (intervalStr, type) => {
+    const value = parseInt(intervalStr.slice(0, -1));
+    const unit = intervalStr.slice(-1);
+
+    if (type !== 'ui') {
+        switch (unit) {
+            case 'm':
+                return value * 60 * 1000;
+            case 'h':
+                return value * 60 * 60 * 1000;
+            case 'd':
+                return value * 24 * 60 * 60 * 1000;
+            case 'M':
+                return { months: value };
+            case 'y':
+                return { years: value };
+            default:
+                throw new Error('Intervallo non valido: ' + intervalStr);
+        }
+    } else {
+        switch (unit) {
+            case 'm':
+                return `${value} ${value !== 1 ? 'minuti' : 'minuto'}`;
+            case 'h':
+                return `${value} ${value !== 1 ? 'ore' : 'ora'}`;
+            case 'd':
+                return `${value} ${value !== 1 ? 'giorni' : 'giorno'}`;
+            case 'M':
+                return `${value} ${value !== 1 ? 'mesi' : 'mese'}`;
+            case 'y':
+                return `${value} ${value !== 1 ? 'anni' : 'anno'}`;
+            default:
+                throw new Error('Intervallo non valido: ' + intervalStr);
+        }
+    }
+};
+
+export { formatCurrency, formatCurrencyColor, formatRecurrency };

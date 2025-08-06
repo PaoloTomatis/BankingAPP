@@ -1,11 +1,18 @@
 // Importazione moduli
 import { Link } from 'react-router-dom';
+import { useNotification } from '../hooks/Notification.context';
+import { useNavigate } from 'react-router-dom';
 // Importazione componenti
 import Input from '../components/Input';
 import Button from '../components/Button';
 
 // Creazione sezione
 const SignupSection = () => {
+    // Navigatore
+    const navigator = useNavigate();
+    // Notificatore
+    const notify = useNotification();
+
     // Funzione gestione errori username
     const handlerUsernameError = (value, setError) => {
         // Sanificazione value
@@ -78,16 +85,9 @@ const SignupSection = () => {
                 psw
             )
         ) {
+            psw = '';
             for (let i = 0; i < length; i++) {
                 psw += data[Math.floor(Math.random() * data.length)];
-            }
-
-            if (
-                !/^(?=[A-Za-z0-9!?. ,\-_@#]{8,255}$)(?=.*[0-9])(?=.*[!?. ,\-_@#])(?!.*[\s()])/.test(
-                    psw
-                )
-            ) {
-                psw = '';
             }
         }
 
@@ -97,7 +97,14 @@ const SignupSection = () => {
     // Funzione registrazione account
     const handlerRegister = () => {
         // TODO Richiesta api di registrazione
-        console.log('REGISTRATO');
+        notify('success', 'Registrazione effettuata correttamente!');
+        setTimeout(() => {
+            notify(
+                'info',
+                "Effettua l'autenticazione per accedere al tuo nuovo account!"
+            );
+        }, 4500);
+        navigator('/auth/login');
     };
 
     return (

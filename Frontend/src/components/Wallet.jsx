@@ -57,7 +57,11 @@ const Wallet = ({ id, name }) => {
             'Conferma ELIMINAZIONE',
             `Eliminando "${name.toUpperCase()}" non sarà più possibile utilizzarlo e tutte le sue transazioni saranno anch'esse irrecuperabili. Quest'azione è irreversibile!`,
             'Procedi',
-            () => console.log('Eliminato portafoglio: ', id)
+            () =>
+                notify(
+                    'success',
+                    'Il Portafoglio è stato eliminato correttamente!'
+                )
         );
     };
 
@@ -97,7 +101,7 @@ const Wallet = ({ id, name }) => {
                 {modify ? (
                     <input
                         type="text"
-                        className={`min-h-[38px] w-[282px] pr-15 pl-3 pt-1 pb-1 border-[3px] rounded-2xl bg-secondary-bg ${
+                        className={`min-h-[38px] w-[282px] pr-15 pl-3 pt-1 pb-1 border-[3px] rounded-2xl bg-components-bg ${
                             error ? 'border-error' : 'border-border'
                         } focus:${
                             error ? 'border-error' : 'border-border'
@@ -118,7 +122,7 @@ const Wallet = ({ id, name }) => {
                     />
                 ) : (
                     <div
-                        className="min-h-[38px] w-[282px] pr-10 pl-3 pt-1 pb-1 border-[3px] border-border rounded-2xl bg-secondary-bg cursor-pointer"
+                        className="min-h-[38px] w-[282px] pr-10 pl-3 pt-1 pb-1 border-[3px] border-border rounded-2xl bg-components-bg cursor-pointer"
                         onClick={() => navigator(`/dashboard/${id}`)}
                     >
                         {currentWallet.name}
