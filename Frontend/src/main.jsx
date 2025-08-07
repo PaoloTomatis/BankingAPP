@@ -25,7 +25,7 @@ const router = createBrowserRouter([
     {
         path: '/',
         element: (
-            <ProtectedRoute page={'/'}>
+            <ProtectedRoute>
                 <Dashboard />
             </ProtectedRoute>
         ),
@@ -33,7 +33,7 @@ const router = createBrowserRouter([
     {
         path: '/dashboard',
         element: (
-            <ProtectedRoute page={'/dashboard'}>
+            <ProtectedRoute>
                 <Dashboard />
             </ProtectedRoute>
         ),
@@ -41,7 +41,7 @@ const router = createBrowserRouter([
     {
         path: '/dashboard/:id',
         element: (
-            <ProtectedRoute page={'/dashboard'}>
+            <ProtectedRoute>
                 <Dashboard />
             </ProtectedRoute>
         ),
@@ -49,7 +49,7 @@ const router = createBrowserRouter([
     {
         path: '/credits',
         element: (
-            <ProtectedRoute page={'/credits'}>
+            <ProtectedRoute>
                 <Credits />
             </ProtectedRoute>
         ),
@@ -57,7 +57,7 @@ const router = createBrowserRouter([
     {
         path: '/auth',
         element: (
-            <ProtectedRoute page={'/auth'}>
+            <ProtectedRoute>
                 <Auth />
             </ProtectedRoute>
         ),
@@ -65,7 +65,7 @@ const router = createBrowserRouter([
     {
         path: '/auth/:type',
         element: (
-            <ProtectedRoute page={'/auth'}>
+            <ProtectedRoute>
                 <Auth />
             </ProtectedRoute>
         ),
@@ -73,7 +73,7 @@ const router = createBrowserRouter([
     {
         path: '/tags',
         element: (
-            <ProtectedRoute page={'/tags'}>
+            <ProtectedRoute>
                 <Tags />
             </ProtectedRoute>
         ),
@@ -81,7 +81,7 @@ const router = createBrowserRouter([
     {
         path: '/transactions',
         element: (
-            <ProtectedRoute page={'/transactions'}>
+            <ProtectedRoute>
                 <Transactions />
             </ProtectedRoute>
         ),
@@ -89,7 +89,7 @@ const router = createBrowserRouter([
     {
         path: '/transactions-history',
         element: (
-            <ProtectedRoute page={'/transactions-history'}>
+            <ProtectedRoute>
                 <TransactionsHistory />
             </ProtectedRoute>
         ),
@@ -97,7 +97,7 @@ const router = createBrowserRouter([
     {
         path: '/transactions-recurrent',
         element: (
-            <ProtectedRoute page={'/transactions-recurrent'}>
+            <ProtectedRoute>
                 <TransactionsRecurrent />
             </ProtectedRoute>
         ),
@@ -105,7 +105,7 @@ const router = createBrowserRouter([
     {
         path: '/account',
         element: (
-            <ProtectedRoute page={'/account'}>
+            <ProtectedRoute>
                 <Account />
             </ProtectedRoute>
         ),
@@ -117,7 +117,7 @@ const router = createBrowserRouter([
     {
         path: '*',
         element: (
-            <ProtectedRoute page={'/404'}>
+            <ProtectedRoute>
                 <Page404 />
             </ProtectedRoute>
         ),

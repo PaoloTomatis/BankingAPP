@@ -1,26 +1,26 @@
 // Importazione moduli
-import { createContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useContext, createContext } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 
 // Contesto
 const ProtectedRouteContext = createContext();
 
 // Provider
-const ProtectedRoute = ({ children, page, auth = false }) => {
-    // Navigatore
-    const navigator = useNavigate();
+const ProtectedRoute = ({ children, auth = false }) => {
+    // Pagina corrente
+    const page = useLocation().pathname;
 
-    // Reindirizzamento
-    useEffect(() => {
-        // Controllo visibilità banner
-        if (!sessionStorage.getItem('bannerShown')) {
-            navigator('/warning');
-        }
-    }, []);
+    if (sessionStorage.getItem('bannerShown') !== 'true') {
+        sessionStorage.setItem('bannerPage', page);
+    }
 
     return (
-        <ProtectedRouteContext.Provider value={page}>
-            {children}
+        <ProtectedRouteContext.Provider value={null}>
+            {sessionStorage.getItem('bannerShown') !== 'true' ? (
+                <Navigate to="/warning" />
+            ) : (
+                children
+            )}
         </ProtectedRouteContext.Provider>
     );
 };
