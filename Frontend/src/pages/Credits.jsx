@@ -1,5 +1,6 @@
 // Importazione moduli
 // Importazione componenti
+import CreditsSection from '../sections/CreditsSection';
 import Navbar from '../components/Navbar';
 // Importazione immagini
 // Importazione stile
@@ -8,6 +9,7 @@ import Navbar from '../components/Navbar';
 const Credits = () => {
     return (
         <>
+            <CreditsSection />
             <Navbar />
         </>
     );

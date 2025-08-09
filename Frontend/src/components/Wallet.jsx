@@ -10,7 +10,7 @@ import checkImgBLK from '../assets/icons/check-BLK.png';
 import addImgBLK from '../assets/icons/add-BLK.png';
 
 // Creazione componente
-const Wallet = ({ id, name }) => {
+const Wallet = ({ id, name, handleDelete }) => {
     // Notificatore
     const notify = useNotification();
     // Poppuper
@@ -49,21 +49,6 @@ const Wallet = ({ id, name }) => {
             console.log(error);
         }
     }, [error]);
-
-    // Funzione gestione eliminazione portafoglio
-    const handleDelete = () => {
-        //TODO - Faccio richiesta eliminazione portafoglio
-        popup(
-            'Conferma ELIMINAZIONE',
-            `Eliminando "${name.toUpperCase()}" non sarà più possibile utilizzarlo e tutte le sue transazioni saranno anch'esse irrecuperabili. Quest'azione è irreversibile!`,
-            'Procedi',
-            () =>
-                notify(
-                    'success',
-                    'Il Portafoglio è stato eliminato correttamente!'
-                )
-        );
-    };
 
     // Funzione gestione modifica portafoglio
     const handleModify = () => {
@@ -152,7 +137,7 @@ const Wallet = ({ id, name }) => {
                     onClick={
                         modify
                             ? () => handleSwitch(false, false)
-                            : () => handleDelete()
+                            : () => handleDelete(id, name)
                     }
                 />
             </div>

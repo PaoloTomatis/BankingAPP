@@ -6,8 +6,6 @@ import Button from '../components/Button';
 
 // Creazione pagina
 const Warning = () => {
-    // Impostazione visualizzazione avviso
-    sessionStorage.setItem('bannerShown', 'true');
     // Navigatore
     const navigator = useNavigate();
 
@@ -16,7 +14,9 @@ const Warning = () => {
 
     // Funzione gestione conferma
     const handleAccept = () => {
+        // Impostazione visualizzazione avviso
         sessionStorage.setItem('bannerShown', 'true');
+        // Rimozione pagina di reindirizzamento
         sessionStorage.removeItem('bannerPage');
         navigator(page);
     };
@@ -31,7 +31,7 @@ const Warning = () => {
                 alcune funzioni) e che qualunque cosa accada sia a completa
                 responsabilità del visitatore! Se non si accettano i seguenti
                 termini si è pregati di chiudere la finestra e non premere sul
-                pulsante. I loghi utilizzati in questo sito sono stati presi dal
+                pulsante. I loghi utilizzati in questo sito sono stati presi da
                 FLATICON, ecco i{' '}
                 <Link className="text-primary" to="/credits">
                     crediti

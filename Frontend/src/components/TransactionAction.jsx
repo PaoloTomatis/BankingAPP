@@ -9,12 +9,8 @@ import closeImg from '../assets/icons/add-BLK.png';
 
 // Creazione componente
 const TransactionAction = ({
-    id: defId,
-    amount: defAmount,
-    type,
-    date: defDate,
-    walletId: defWalletId,
-    tagId: defTagId,
+    transaction,
+    setTransaction,
     setShow,
     recurrent,
 }) => {
@@ -24,25 +20,26 @@ const TransactionAction = ({
     const anno = oggi.getFullYear();
 
     // Transazione originale
-    const originalTransaction = {
-        id: defId,
-        amount: type === 'income' ? defAmount : -defAmount,
-        date: defDate || `${anno}-${mese}-${giorno}`,
-        walletId: defWalletId,
-        tagId: defTagId,
-    };
+    // const originalTransaction = {
+    //     id: defId,
+    //     amount: type === 'income' ? defAmount : -defAmount,
+    //     date: defDate || `${anno}-${mese}-${giorno}`,
+    //     walletId: defWalletId,
+    //     tagId: defTagId,
+    // };
+    const originalTransaction = transaction;
     // Notificatore
     const notify = useNotification();
     // Stato portafogli
     const [wallets, setWallets] = useState([]);
     // Stato tags
     const [tags, setTags] = useState([]);
-    // Stato transazione
-    const [transaction, setTransaction] = useState(originalTransaction);
     // Stato errore
     const [error, setError] = useState(null);
     // Stato caricamento
     const [loading, setLoading] = useState(true);
+    // Stato transazione locale
+    const [localTransaction, setLocalTransaction] = useState(transaction);
 
     // Caricamento dati
     useEffect(() => {
@@ -78,17 +75,24 @@ const TransactionAction = ({
     // Funzione gestione salvataggio
     const handleSave = () => {
         try {
-            //TODO - Effettuo chiamata API
-            const keys1 = Object.keys(transaction);
+            const keys1 = Object.keys(localTransaction);
             let save = false;
 
             // Controllo uguaglianza transazione
             for (let key of keys1) {
-                if (transaction[key] !== originalTransaction[key]) save = true;
+                if (localTransaction[key] !== originalTransaction[key])
+                    save = true;
             }
 
             // Esecuzione salvataggio
             if (save && !recurrent) {
+                //TODO - Effettuo chiamata API
+                setTransaction({
+                    ...localTransaction,
+                    amount: parseFloat(localTransaction.amount),
+                    walletId: Number(localTransaction.walletId),
+                    tagId: Number(localTransaction.tagId),
+                });
                 notify(
                     'success',
                     'La transazione è stata modificata correttamente!'
@@ -97,9 +101,13 @@ const TransactionAction = ({
                 // Lista possibili ricorrenze
                 const possibleRecurrence = ['m', 'h', 'd', 'w', 'M', 'y'];
                 if (
-                    possibleRecurrence.includes(transaction.date.slice(-1)) &&
-                    !isNaN(transaction.date.slice(0, -1))
+                    possibleRecurrence.includes(
+                        localTransaction.date.slice(-1)
+                    ) &&
+                    !isNaN(localTransaction.date.slice(0, -1))
                 ) {
+                    //TODO - Effettuo chiamata API
+                    setTransaction(localTransaction);
                     notify(
                         'success',
                         'La transazione è stata modificata correttamente!'
@@ -129,12 +137,22 @@ const TransactionAction = ({
                             <input
                                 type="number"
                                 step="0.01"
-                                value={transaction.amount}
+                                value={
+                                    localTransaction.type == 'income'
+                                        ? +localTransaction.amount
+                                        : localTransaction.type == 'expense'
+                                        ? -localTransaction.amount
+                                        : 0
+                                }
                                 className="text-4xlarge border-none bg-transparent outline-none w-[95%] max-w-[100px] text-center [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none"
                                 onChange={(e) =>
-                                    setTransaction({
-                                        ...transaction,
-                                        amount: e.target.value,
+                                    setLocalTransaction({
+                                        ...localTransaction,
+                                        amount: Math.abs(e.target.value),
+                                        type:
+                                            e.target.value >= 0
+                                                ? 'income'
+                                                : 'expense',
                                     })
                                 }
                             />
@@ -146,11 +164,11 @@ const TransactionAction = ({
                             </p>
                             <input
                                 type={recurrent ? 'text' : 'date'}
-                                value={transaction.date}
+                                value={localTransaction.date}
                                 className="text-large border-none bg-transparent outline-none w-[95%] max-w-[200px] text-center"
                                 onChange={(e) =>
-                                    setTransaction({
-                                        ...transaction,
+                                    setLocalTransaction({
+                                        ...localTransaction,
                                         date: e.target.value,
                                     })
                                 }
@@ -159,10 +177,10 @@ const TransactionAction = ({
                         <div className="flex items-center justify-center">
                             <p className="text-large font-bold">Portafoglio:</p>
                             <select
-                                value={transaction.walletId}
+                                value={localTransaction.walletId}
                                 onChange={(e) =>
-                                    setTransaction({
-                                        ...transaction,
+                                    setLocalTransaction({
+                                        ...localTransaction,
                                         walletId: e.target.value,
                                     })
                                 }
@@ -183,15 +201,22 @@ const TransactionAction = ({
                         <div className="flex items-center justify-center">
                             <p className="text-large font-bold">Tag:</p>
                             <select
-                                value={transaction.tagId}
-                                onChange={(e) =>
-                                    setTransaction({
-                                        ...transaction,
-                                        tagId: e.target.value,
-                                    })
-                                }
+                                value={localTransaction.tagId}
+                                onChange={(e) => {
+                                    setLocalTransaction({
+                                        ...localTransaction,
+                                        tagId: parseInt(e.target.value) || null,
+                                        tagColor:
+                                            tags.find(
+                                                (tag) =>
+                                                    tag.id ===
+                                                    parseInt(e.target.value)
+                                            )?.color || '#000',
+                                    });
+                                }}
                                 className="text-large border-none bg-transparent outline-none w-[95%] max-w-[200px] text-center"
                             >
+                                <option value={''}>- No Tag -</option>
                                 {tags.map((tag) => {
                                     return (
                                         <option key={tag.id} value={tag.id}>

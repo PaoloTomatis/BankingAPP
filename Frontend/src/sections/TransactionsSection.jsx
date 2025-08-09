@@ -1,13 +1,18 @@
 // Importazione moduli
 import { useEffect, useState } from 'react';
 import { useNotification } from '../hooks/Notification.context';
+import { usePopup } from '../hooks/Popup.context';
 // Importazione componenti
 import Transaction from '../components/Transaction';
 import Spinner from '../components/Spinner';
+import Input from '../components/Input';
 // Importazione immagini
+import addImgBLK from '../assets/icons/add-BLK.png';
 
 // Creazione sezione
 const TransactionsSection = ({ className, recurrents = false }) => {
+    // Poppuper
+    const popup = usePopup();
     // Notificatore
     const notify = useNotification();
     // Stato transazioni
@@ -18,6 +23,75 @@ const TransactionsSection = ({ className, recurrents = false }) => {
     const [loading, setLoading] = useState(true);
     // Stato errore
     const [error, setError] = useState(null);
+
+    // Funzione gestione eliminazione transazione
+    const handleDelete = (id) => {
+        popup(
+            'Conferma ELIMINAZIONE',
+            "Eliminando la TRANSAZIONE essa non sarà più reperibile e ciò influirà nel calcolo del bilancio. Quest'azione è irreversibile!",
+            'Procedi',
+            () => {
+                //TODO - Faccio richiesta eliminazione transazione
+                setTransactions(
+                    transactions.filter((transaction) => transaction.id !== id)
+                );
+                notify(
+                    'success',
+                    'La Transazione è stata eliminata correttamente!'
+                );
+            }
+        );
+    };
+
+    // Funzione gestione creazione portafoglio
+    const handlerInput = (value, setValue, setError) => {
+        // Sanificazione input
+        const sanitizedValue = Math.round(parseFloat(value) * 100) / 100;
+
+        // Controllo value
+        if (
+            (sanitizedValue != 0 || !sanitizedValue) &&
+            !isNaN(sanitizedValue)
+        ) {
+            const date = new Date().toISOString().slice(0, 10);
+
+            // Gestione valore
+            //TODO - Faccio richiesta aggiunta importo
+            //TODO - Mancanza id alle nuove transazioni (dovrei ricevere id da backend)
+            setTransactions(
+                !recurrents
+                    ? [
+                          ...transactions,
+                          {
+                              amount: Math.abs(sanitizedValue),
+                              walletId: 1,
+                              tagId: null,
+                              userId: 1,
+                              date: date,
+                              type: sanitizedValue >= 0 ? 'income' : 'expense',
+                          },
+                      ]
+                    : [
+                          ...transactions,
+                          {
+                              userId: 1,
+                              walletId: 1,
+                              tagId: null,
+                              amount: Math.abs(sanitizedValue),
+                              type: sanitizedValue >= 0 ? 'income' : 'expense',
+                              recurrence: '1m',
+                              last_date: new Date().toISOString(),
+                          },
+                      ]
+            );
+            // Cancello testo e errore
+            setValue(0.0);
+            setError(null);
+        } else if (!sanitizedValue || isNaN(sanitizedValue)) {
+            // Gestione errore
+            setError("L'importo deve essere un numero positivo o negativo!");
+        }
+    };
 
     // Caricamento dati
     useEffect(() => {
@@ -109,37 +183,50 @@ const TransactionsSection = ({ className, recurrents = false }) => {
             {loading ? (
                 <Spinner />
             ) : (
-                <div
-                    className={`${className} w-full gap-4 flex flex-col items-center`}
-                >
-                    {transactions.map((transaction) => {
-                        return (
-                            <Transaction
-                                key={transaction.id}
-                                id={transaction.id}
-                                amount={transaction.amount}
-                                type={transaction.type}
-                                date={
-                                    !recurrents
-                                        ? transaction.date
-                                        : transaction.recurrence
-                                }
-                                recurrent={recurrents ? true : false}
-                                tagColor={
-                                    tags[
-                                        tags.findIndex(
-                                            (tag) =>
-                                                tag.id === transaction.tag_id
-                                        )
-                                    ]?.color || '#000000'
-                                }
-                                actionBtn={true}
-                                tagId={transaction.tag_id}
-                                walletId={transaction.wallet_id}
-                            />
-                        );
-                    })}
-                </div>
+                <>
+                    <Input
+                        placeHolder={"Inserisci l'Importo"}
+                        addHandler={handlerInput}
+                        icon={addImgBLK}
+                        defValue={0.0}
+                        type="number"
+                        step="0.01"
+                        className="mt-[5vh]"
+                    />
+                    <div
+                        className={`${className} w-full gap-4 flex flex-col items-center`}
+                    >
+                        {transactions.map((transaction) => {
+                            return (
+                                <Transaction
+                                    key={transaction.id}
+                                    id={transaction.id}
+                                    amount={transaction.amount}
+                                    type={transaction.type}
+                                    date={
+                                        !recurrents
+                                            ? transaction.date
+                                            : transaction.recurrence
+                                    }
+                                    recurrent={recurrents ? true : false}
+                                    tagColor={
+                                        tags[
+                                            tags.findIndex(
+                                                (tag) =>
+                                                    tag.id ===
+                                                    transaction.tag_id
+                                            )
+                                        ]?.color || '#000000'
+                                    }
+                                    actionBtn={true}
+                                    tagId={transaction.tag_id}
+                                    walletId={transaction.wallet_id}
+                                    handleDelete={handleDelete}
+                                />
+                            );
+                        })}
+                    </div>
+                </>
             )}
         </>
     );

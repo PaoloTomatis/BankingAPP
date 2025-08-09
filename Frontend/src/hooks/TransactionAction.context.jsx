@@ -6,6 +6,7 @@ import TransactionAction from '../components/TransactionAction';
 // Context avvisi
 const TransactionActionContext = createContext(null);
 
+// Hook
 const useTransactionAction = () => {
     return useContext(TransactionActionContext);
 };
@@ -17,15 +18,11 @@ const TransactionActionProvider = ({ children }) => {
     const [transactionActionShow, setTransactionActionShow] = useState(false);
 
     // Funzione invio notifica
-    const notify = (id, amount, type, date, walletId, tagId, recurrent) => {
+    const notify = (transaction, setTransaction, recurrent) => {
         // Impostazione notifica
         setTransactionAction({
-            id,
-            amount,
-            type,
-            walletId,
-            date,
-            tagId,
+            transaction,
+            setTransaction,
             recurrent,
         });
         // Impostazione visibilità notifica
@@ -37,12 +34,8 @@ const TransactionActionProvider = ({ children }) => {
             {children}
             {transactionActionShow ? (
                 <TransactionAction
-                    id={transactionAction.id}
-                    amount={transactionAction.amount}
-                    type={transactionAction.type}
-                    walletId={transactionAction.walletId}
-                    date={transactionAction.date}
-                    tagId={transactionAction.tagId}
+                    transaction={transactionAction.transaction}
+                    setTransaction={transactionAction.setTransaction}
                     recurrent={transactionAction.recurrent}
                     setShow={setTransactionActionShow}
                 />

@@ -4,8 +4,8 @@ import {
     formatCurrencyColor,
     formatRecurrency,
 } from '../utils/utils';
-import { usePopup } from '../hooks/Popup.context';
 import { useTransactionAction } from '../hooks/TransactionAction.context';
+import { useState } from 'react';
 // Importazione componenti
 // Importazione immagini
 import modifyImg from '../assets/icons/pen-BLK.png';
@@ -22,38 +22,42 @@ const Transaction = ({
     date,
     recurrent = false,
     actionBtn = false,
+    handleDelete,
 }) => {
-    // Poppuper
-    const popup = usePopup();
-    // Azionatore Transazionme
+    // Azionatore Transazione
     const modify = useTransactionAction();
-
-    // Funzione gestione eliminazione transazione
-    const handleDelete = () => {
-        //TODO - Faccio richiesta eliminazione transazione
-        popup(
-            'Conferma ELIMINAZIONE',
-            "Eliminando la TRANSAZIONE essa non sarà più reperibile e ciò influirà nel calcolo del bilancio. Quest'azione è irreversibile!",
-            'Procedi',
-            () =>
-                notify(
-                    'success',
-                    'La Transazione è stata eliminata correttamente!'
-                )
-        );
-    };
+    // Stato transazione corrente
+    const [currentTransaction, setCurrentTransaction] = useState({
+        id,
+        amount,
+        tagColor,
+        tagId,
+        walletId,
+        type,
+        date,
+    });
 
     return (
         <div className="flex items-center w-full border-border border-[3px] rounded-2xl justify-between p-2 max-w-[400px] bg-components-bg">
-            <p className={`text-normal ${formatCurrencyColor(amount, type)}`}>
-                {formatCurrency(amount, type)}
+            <p
+                className={`text-normal ${formatCurrencyColor(
+                    currentTransaction.amount,
+                    currentTransaction.type
+                )}`}
+            >
+                {formatCurrency(
+                    currentTransaction.amount,
+                    currentTransaction.type
+                )}
             </p>
             <p className="text-normal text-primary-txt">
-                {!recurrent ? date : formatRecurrency(date, 'ui')}
+                {!recurrent
+                    ? currentTransaction.date
+                    : formatRecurrency(currentTransaction.date, 'ui')}
             </p>
             <div
                 className="w-10 h-10 rounded-[50%]"
-                style={{ backgroundColor: tagColor }}
+                style={{ backgroundColor: currentTransaction.tagColor }}
             ></div>
             {actionBtn ? (
                 <div className="flex gap-2">
@@ -64,12 +68,8 @@ const Transaction = ({
                         className="aspect-square w-6 h-6 object-cover"
                         onClick={() =>
                             modify(
-                                id,
-                                amount,
-                                type,
-                                date,
-                                walletId,
-                                tagId,
+                                currentTransaction,
+                                setCurrentTransaction,
                                 recurrent || false
                             )
                         }
@@ -79,7 +79,7 @@ const Transaction = ({
                         alt="elimina"
                         role="button"
                         className="aspect-square w-6 h-6 object-cover"
-                        onClick={handleDelete}
+                        onClick={() => handleDelete(currentTransaction.id)}
                     />
                 </div>
             ) : null}

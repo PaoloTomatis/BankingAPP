@@ -1,7 +1,6 @@
 // Importazione moduli
 import { useState } from 'react';
 import { useNotification } from '../hooks/Notification.context';
-import { usePopup } from '../hooks/Popup.context';
 // Importazione immagini
 import modifyImgBLK from '../assets/icons/pen-BLK.png';
 import deleteImgBLK from '../assets/icons/delete-BLK.png';
@@ -9,30 +8,21 @@ import checkImgBLK from '../assets/icons/check-BLK.png';
 import addImgBLK from '../assets/icons/add-BLK.png';
 
 // Creazione componente
-const Tag = ({ id, name, color = '#000' }) => {
+const Tag = ({ id, name, color = '#000', handleDelete }) => {
     // Notificatore
     const notify = useNotification();
-    // Poppuper
-    const popup = usePopup();
     // Stato input
     const [input, setInput] = useState({ name: name, color: color });
     // Stato modifica
     const [modify, setModify] = useState(false);
-    // Stato nome corrente
-    const [currentTag, setCurrentTag] = useState({ name: name, color: color });
+    // Stato tag corrente
+    const [currentTag, setCurrentTag] = useState({
+        id: id,
+        name: name,
+        color: color,
+    });
     // Stato errore
     const [error, setError] = useState(null);
-
-    // Funzione gestione eliminazione portafoglio
-    const handleDelete = () => {
-        //TODO - Faccio richiesta eliminazione portafoglio
-        popup(
-            'Conferma ELIMINAZIONE',
-            `Eliminando il tag "${name.toUpperCase()}" non sarà più possibile utilizzarlo e tutte le transazioni che lo utilizzano rimarranno senza il medesimo. Quest'azione è irreversibile!`,
-            'Procedi',
-            () => notify('success', 'Il Tag è stato eliminato correttamente!')
-        );
-    };
 
     // Funzione gestione modifica portafoglio
     const handleModify = () => {
@@ -154,7 +144,7 @@ const Tag = ({ id, name, color = '#000' }) => {
                     onClick={
                         modify
                             ? () => handleSwitch(false, false)
-                            : () => handleDelete()
+                            : () => handleDelete(id, name)
                     }
                 />
             </div>
