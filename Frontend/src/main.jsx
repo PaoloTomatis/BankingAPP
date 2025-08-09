@@ -6,6 +6,7 @@ import { NotificationProvider } from './hooks/Notification.context';
 import { PopupProvider } from './hooks/Popup.context';
 import { TransactionActionProvider } from './hooks/TransactionAction.context';
 import { ProtectedRoute } from './hooks/ProtectedRoute.context';
+import { AuthProvider } from './hooks/Auth.context';
 // Importazione pagine
 import Dashboard from './pages/Dashboard';
 import Credits from './pages/Credits';
@@ -127,12 +128,14 @@ const router = createBrowserRouter([
 // Caricamento router
 createRoot(document.getElementById('root')).render(
     <StrictMode>
-        <NotificationProvider>
-            <PopupProvider>
-                <TransactionActionProvider>
-                    <RouterProvider router={router} />
-                </TransactionActionProvider>
-            </PopupProvider>
-        </NotificationProvider>
+        <AuthProvider>
+            <NotificationProvider>
+                <PopupProvider>
+                    <TransactionActionProvider>
+                        <RouterProvider router={router} />
+                    </TransactionActionProvider>
+                </PopupProvider>
+            </NotificationProvider>
+        </AuthProvider>
     </StrictMode>
 );

@@ -71,7 +71,7 @@ const postRecurringTransactions = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { name, walletId, amount, type, tagId, recurrence, description } =
+        const { name, walletId, amount, type, tagId, recurrence } =
             req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
@@ -112,14 +112,26 @@ const postRecurringTransactions = async (req, res) => {
 
         // Esecuzione inserimento transazione ricorrente
         await pool.query(
-            'INSERT INTO recurring_transactions (name, wallet_id, amount, type, tag_id, description, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO recurring_transactions (name, wallet_id, amount, type, tag_id, user_id) VALUES (?, ?, ?, ?, ?, ?)',
             [
                 name,
                 walletId,
                 parseFloat(amount.toFixed(2)),
                 type,
                 tagId || null,
-                description || null,
+                userId,
+            ]
+        );
+
+        // Esecuzione richiesta transazione ricorrente
+        const [[recurring_transaction]] = await pool.query(
+            'SELECT id FROM recurring_transactions WHERE name = ? AND wallet_id = ? AND amount = ? AND type = ? AND tag_id = ? AND user_id = ?',
+            [
+                name,
+                walletId,
+                parseFloat(amount.toFixed(2)),
+                type,
+                tagId || null,
                 userId,
             ]
         );
@@ -129,7 +141,8 @@ const postRecurringTransactions = async (req, res) => {
             res,
             201,
             true,
-            'Transazione ricorrente aggiunta correttamente!'
+            'Transazione ricorrente aggiunta correttamente!',
+            recurring_transaction
         );
     } catch (error) {
         // Invio errore alla console
@@ -146,7 +159,7 @@ const patchRecurringTransaction = async (req, res) => {
         // Ricevo dati dalla richiesta
         const { id: recurringTransactionsId } =
             req.body && req.body.where ? req.body.where : {};
-        const { name, description, amount, type, tagId, recurrence } =
+        const { name, amount, type, tagId, recurrence } =
             req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
@@ -179,15 +192,6 @@ const patchRecurringTransaction = async (req, res) => {
         ) {
             fields.push('name = ?');
             values.push(name);
-        }
-
-        if (
-            description &&
-            description?.length < 300 &&
-            typeof description == 'string'
-        ) {
-            fields.push('description = ?');
-            values.push(description);
         }
 
         if (amount && !isNaN(amount)) {
@@ -274,7 +278,7 @@ const deleteRecurringTransaction = async (req, res) => {
 
         // Esecuzione eliminazione transazione ricorrente
         await pool.query(
-            'DELETE FROM recurrint_transactiions WHERE id = ? AND user_id = ? ',
+            'DELETE FROM recurring_transactions WHERE id = ? AND user_id = ? ',
             [recurringTransactionsId, userId]
         );
 

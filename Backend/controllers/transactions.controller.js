@@ -111,12 +111,26 @@ const postTransactions = async (req, res) => {
             ]
         );
 
+        // Esecuzione richiesta transazione
+        const [[transaction]] = await pool.query(
+            'SELECT id FROM transactions WHERE user_id = ? AND wallet_id = ? AND amount = ? AND type = ? AND tag_id = ? AND date = ?',
+            [
+                userId,
+                walletId,
+                parseFloat(amount.toFixed(2)),
+                type,
+                tagId || null,
+                date,
+            ]
+        );
+
         // Invio risposta finale
         return responseHandler(
             res,
             201,
             true,
-            'Transazione creata correttamente!'
+            'Transazione creata correttamente!',
+            transaction
         );
     } catch (error) {
         // Invio errore alla console

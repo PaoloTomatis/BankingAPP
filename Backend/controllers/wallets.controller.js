@@ -96,12 +96,19 @@ const postWallets = async (req, res) => {
             userId,
         ]);
 
+        // Esecuzione richiesta portafoglio
+        const [[wallet]] = await pool.query(
+            'SELECT id FROM wallets WHERE name = ? AND user_id = ?',
+            [name, userId]
+        );
+
         // Invio risposta finale
         return responseHandler(
             res,
             201,
             true,
-            'Portafoglio creato correttamente!'
+            'Portafoglio creato correttamente!',
+            wallet
         );
     } catch (error) {
         // Invio errore alla console

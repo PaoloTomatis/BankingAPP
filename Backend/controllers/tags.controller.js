@@ -62,8 +62,7 @@ const postTags = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { name, description, color } =
-            req.body && req.body.data ? req.body.data : {};
+        const { name, color } = req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
         // Controllo dati ricevuti
@@ -81,7 +80,6 @@ const postTags = async (req, res) => {
             name?.length > 30 ||
             name?.length < 3 ||
             typeof name !== 'string' ||
-            description?.length > 300 ||
             !color.includes('#') ||
             color?.lenght > 7
         )
@@ -94,8 +92,14 @@ const postTags = async (req, res) => {
 
         // Esecuzione aggiunta categoria
         await pool.query(
-            'INSERT INTO tags (name, description, color, user_id) VALUES (?, ?, ?, ?)',
-            [name, description || null, color || '#000', userId]
+            'INSERT INTO tags (name, color, user_id) VALUES (?, ?, ?)',
+            [name, color || '#000', userId]
+        );
+
+        // Esecuzione richiesta categoria
+        const [[tag]] = await pool.query(
+            'SELECT id FROM tags WHERE name = ? AND color = ? AND user_id = ?',
+            [name, color || '#000', userId]
         );
 
         // Invio risposta finale
@@ -103,7 +107,8 @@ const postTags = async (req, res) => {
             res,
             201,
             true,
-            'Categoria creata correttamente!'
+            'Categoria creata correttamente!',
+            tag
         );
     } catch (error) {
         // Invio errore alla console
@@ -119,8 +124,7 @@ const patchTag = async (req, res) => {
     try {
         // Ricevo dati dalla richiesta
         const { id: tagId } = req.body && req.body.where ? req.body.where : {};
-        const { name, description } =
-            req.body && req.body.data ? req.body.data : {};
+        const { name } = req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
         // Liste per creazione query
@@ -159,15 +163,6 @@ const patchTag = async (req, res) => {
         if (tagId && !isNaN(tagId)) {
             fields.push('tag_id = ?');
             values.push(tagId);
-        }
-
-        if (
-            description &&
-            typeof description == 'string' &&
-            description < 300
-        ) {
-            fields.push('description = ?');
-            values.push(description);
         }
 
         // Controllo dati ricevuti

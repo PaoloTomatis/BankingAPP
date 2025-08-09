@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { useNotification } from '../hooks/Notification.context';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/Auth.context';
 // Importazione componenti
 import Input from '../components/Input';
 import Button from '../components/Button';
@@ -12,6 +13,8 @@ const LoginSection = () => {
     const navigator = useNavigate();
     // Notificatore
     const notify = useNotification();
+    // Autenticazione
+    const { login } = useAuth();
 
     // Funzione gestione errori email
     const handlerEmailError = (value, setError) => {
