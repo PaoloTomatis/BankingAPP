@@ -69,6 +69,7 @@ const TransactionAction = ({
     useEffect(() => {
         if (error) {
             notify('error', error);
+            setError(null);
         }
     }, [error]);
 

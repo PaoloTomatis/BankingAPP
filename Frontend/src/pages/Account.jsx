@@ -2,23 +2,30 @@
 import { usePopup } from '../hooks/Popup.context';
 import { useNotification } from '../hooks/Notification.context';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/Auth.context';
+import { useState, useEffect } from 'react';
 // Importazione componenti
 import Navbar from '../components/Navbar';
 import Button from '../components/Button';
+import Spinner from '../components/Spinner';
 // Importazione immagini
 import profileImg from '../assets/icons/user-BLK.png';
 
 // Creazione pagina
 const Account = () => {
     //TODO - Ricavo dati da useAuth
-    // Stato account
-    const account = { id: 1, username: 'Pollito0o0', email: 'pol@gmail.com' };
     // Popupper
     const popup = usePopup();
     // Notificatore
     const notify = useNotification();
     // Navigatore
     const navigator = useNavigate();
+    // Autenticazione
+    const { user, logout, userDelete } = useAuth();
+    // Stato caricamento
+    const [loading, setLoading] = useState(false);
+    // Stato errore
+    const [error, setError] = useState(null);
 
     // Funzione gestione logout
     const handleLogout = () => {
@@ -27,6 +34,7 @@ const Account = () => {
             'Continuando uscirai dal tuo account e sarà necessaria la riautenticazione per la visualizzazione dei tuoi dati!',
             'Procedi',
             () => {
+                logout(setError, setLoading);
                 notify(
                     'success',
                     'Il Logout è stato effettuato correttamente!'
@@ -44,12 +52,21 @@ const Account = () => {
             "Eliminando il tuo ACCOUNT non sarà più possibile utilizzarlo e tutti i suoi dati verranno eliminati. Quest'azione è irreversibile!",
             'Procedi',
             () => {
-                notify('success', "L'Account è stato eliminato correttamente!"),
-                    navigator('/auth/signup');
+                userDelete(setError, setLoading);
+                notify('success', "L'Account è stato eliminato correttamente!");
+                navigator('/auth/signup');
             }
         );
         //TODO - Richiesta eliminazione da useAuth
     };
+
+    // Controllo errore
+    useEffect(() => {
+        if (error) {
+            notify('error', error);
+            setError(error);
+        }
+    }, [error]);
 
     return (
         <>
@@ -61,20 +78,26 @@ const Account = () => {
                         className="w-[65px] h-[65px] rounded-full object-cover bg-white p-1"
                     />
                     <p className="text-normal">
-                        Username: <strong>{account.username}</strong>
+                        Username: <strong>{user.username}</strong>
                     </p>
                     <p className="text-normal">
-                        Email: <strong>{account.email}</strong>
+                        Email: <strong>{user.email}</strong>
                     </p>
                 </div>
                 <div className="h-[3px] bg-black w-full mt-3 mb-3"></div>
                 <div className="h-[50vh] w-full flex flex-col items-center justify-center gap-3">
-                    <Button onClick={handleLogout} type={'warning'}>
-                        Logout ACCOUNT
-                    </Button>
-                    <Button onClick={handleDelete} type={'warning'}>
-                        Elimina ACCOUNT
-                    </Button>
+                    {loading ? (
+                        <Spinner />
+                    ) : (
+                        <>
+                            <Button onClick={handleLogout} type={'warning'}>
+                                Logout ACCOUNT
+                            </Button>
+                            <Button onClick={handleDelete} type={'warning'}>
+                                Elimina ACCOUNT
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
             <Navbar />

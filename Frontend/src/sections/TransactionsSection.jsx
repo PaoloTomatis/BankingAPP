@@ -174,7 +174,7 @@ const TransactionsSection = ({ className, recurrents = false }) => {
     useEffect(() => {
         if (error) {
             notify('error', error);
-            console.log(error);
+            setError(null);
         }
     }, [error]);
 

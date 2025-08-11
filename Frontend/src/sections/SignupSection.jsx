@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 import { useNotification } from '../hooks/Notification.context';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/Auth.context';
+import { useEffect, useState } from 'react';
+import { pswGenerator } from '../utils/utils';
 // Importazione componenti
 import Input from '../components/Input';
 import Button from '../components/Button';
+import Spinner from '../components/Spinner';
 
 // Creazione sezione
 const SignupSection = () => {
@@ -15,6 +18,21 @@ const SignupSection = () => {
     const notify = useNotification();
     // Autenticazione
     const { signup } = useAuth();
+    // Stato username
+    const [username, setUsername] = useState('Username');
+    // Stato email
+    const [email, setEmail] = useState('email@email.com');
+    // Stato password
+    const [password, setPassword] = useState(() => pswGenerator(20));
+    // Stato errore
+    const [error, setError] = useState({
+        username: null,
+        email: null,
+        password: null,
+        page: null,
+    });
+    // Stato caricamento
+    const [loading, setLoading] = useState(false);
 
     // Funzione gestione errori username
     const handlerUsernameError = (value, setError) => {
@@ -77,37 +95,54 @@ const SignupSection = () => {
         }
     };
 
-    // Funzione generatrice di password
-    const pswGenerator = (length) => {
-        const data =
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?. ,-_@#';
-        let psw = '';
-
-        while (
-            !/^(?=[A-Za-z0-9!?. ,\-_@#]{8,255}$)(?=.*[0-9])(?=.*[!?. ,\-_@#])(?!.*[\s()])/.test(
-                psw
-            )
-        ) {
-            psw = '';
-            for (let i = 0; i < length; i++) {
-                psw += data[Math.floor(Math.random() * data.length)];
-            }
+    // Controllo errore
+    useEffect(() => {
+        if (error.page) {
+            notify('error', error.page);
+            setError({ ...error, page: null });
         }
-
-        return psw;
-    };
+    }, [error.page]);
 
     // Funzione registrazione account
-    const handlerRegister = () => {
-        // TODO Richiesta api di registrazione
-        notify('success', 'Registrazione effettuata correttamente!');
-        setTimeout(() => {
-            notify(
-                'info',
-                "Effettua l'autenticazione per accedere al tuo nuovo account!"
-            );
-        }, 4500);
-        navigator('/auth/login');
+    const handlerRegister = async () => {
+        // Errori locali
+        const localErrors = {};
+
+        // Controllo errori
+        handlerUsernameError(
+            username,
+            (value) => (localErrors.username = value)
+        );
+        handlerEmailError(email, (value) => (localErrors.email = value));
+        handlerPasswordError(
+            password,
+            (value) => (localErrors.password = value)
+        );
+        const result = Object.values(localErrors).every((v) => v == null)
+            ? await signup(
+                  username,
+                  email,
+                  password,
+                  (value) => setError((prev) => ({ ...prev, page: value })),
+                  setLoading
+              )
+            : 'bad request';
+
+        // Impostazione errori
+        setError((prev) => ({ ...prev, ...localErrors }));
+
+        if (result && result !== 'bad request') {
+            notify('success', 'Registrazione effettuata correttamente!');
+            setTimeout(() => {
+                notify(
+                    'info',
+                    "Effettua l'autenticazione per accedere al tuo nuovo account!"
+                );
+            }, 4500);
+            navigator('/auth/login');
+        } else if (result !== 'bad request') {
+            setPassword('');
+        }
     };
 
     return (
@@ -116,23 +151,39 @@ const SignupSection = () => {
                 <h1 className="text-3xlarge font-extrabold">Benvenuto!👋</h1>
                 <Input
                     placeHolder={"Inserisci l'Username"}
-                    errorHandler={handlerUsernameError}
-                    defValue="Username"
+                    value={username}
+                    setValue={setUsername}
+                    inputError={error.username}
+                    setInputError={(value) =>
+                        setError((prev) => ({ ...prev, username: value }))
+                    }
                 />
                 <Input
                     placeHolder={"Inserisci l'Email"}
-                    errorHandler={handlerEmailError}
-                    defValue="email@email.com"
+                    value={email}
+                    setValue={setEmail}
+                    inputError={error.email}
+                    setInputError={(value) =>
+                        setError((prev) => ({ ...prev, email: value }))
+                    }
                 />
                 <Input
                     placeHolder={'Inserisci la Password'}
-                    errorHandler={handlerPasswordError}
-                    defValue={() => pswGenerator(20)}
+                    value={password}
+                    setValue={setPassword}
+                    inputError={error.password}
+                    setInputError={(value) =>
+                        setError((prev) => ({ ...prev, password: value }))
+                    }
                     type="password"
                 />
-                <Button className="text-[#fff]" onClick={handlerRegister}>
-                    Registrati
-                </Button>
+                {loading ? (
+                    <Spinner />
+                ) : (
+                    <Button className="text-[#fff]" onClick={handlerRegister}>
+                        Registrati
+                    </Button>
+                )}
                 <p className="text-small">
                     Hai già un account?{' '}
                     <Link

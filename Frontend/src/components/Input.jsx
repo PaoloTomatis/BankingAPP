@@ -11,19 +11,37 @@ const Input = ({
     className = '',
     disableOnError = true,
     defValue = '',
+    value,
+    setValue,
+    inputError,
+    setInputError,
     step,
 }) => {
     // Stato input
-    const [input, setInput] = useState(defValue);
+    const [internalInput, setInternalInput] = useState(defValue || '');
+    const input =
+        value !== undefined && setValue !== undefined ? value : internalInput;
+    const setInput =
+        value !== undefined && setValue !== undefined
+            ? setValue
+            : setInternalInput;
     // Stato errore
-    const [error, setError] = useState(null);
+    const [internalInputError, setInternalInputError] = useState(null);
+    const error =
+        inputError !== undefined && setInputError !== undefined
+            ? inputError
+            : internalInputError;
+    const setError =
+        inputError !== undefined && setInputError !== undefined
+            ? setInputError
+            : setInternalInputError;
 
     // Gestione errori
     useEffect(() => {
         if (errorHandler) {
             errorHandler(input, setError);
         }
-    }, [input]);
+    }, [input, errorHandler, setError]);
 
     return (
         <>

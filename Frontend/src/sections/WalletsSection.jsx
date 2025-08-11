@@ -45,6 +45,7 @@ const WalletsSection = () => {
     useEffect(() => {
         if (error) {
             notify('error', error);
+            setError(null);
         }
     }, [error]);
 

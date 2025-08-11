@@ -78,7 +78,12 @@ const login = async (req, res) => {
         });
 
         // Invio risposta con access token
-        return responseHandler(res, 200, true, null, accessToken);
+        return responseHandler(res, 200, true, null, {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            accessToken,
+        });
     } catch (error) {
         // Invio errore alla console
         console.error(error);

@@ -59,6 +59,7 @@ const TagsSection = () => {
     useEffect(() => {
         if (error) {
             notify('error', error);
+            setError(null);
         }
     }, [error]);
 

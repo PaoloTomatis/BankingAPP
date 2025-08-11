@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 import { useNotification } from '../hooks/Notification.context';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/Auth.context';
+import { useEffect, useState } from 'react';
+import { pswGenerator } from '../utils/utils';
 // Importazione componenti
 import Input from '../components/Input';
 import Button from '../components/Button';
+import Spinner from '../components/Spinner';
 
 // Creazione sezione
 const LoginSection = () => {
@@ -15,6 +18,18 @@ const LoginSection = () => {
     const notify = useNotification();
     // Autenticazione
     const { login } = useAuth();
+    // Stato email
+    const [email, setEmail] = useState('email@email.com');
+    // Stato password
+    const [password, setPassword] = useState(() => pswGenerator(20));
+    // Stato errore
+    const [error, setError] = useState({
+        email: null,
+        password: null,
+        page: null,
+    });
+    // Stato caricamento
+    const [loading, setLoading] = useState(false);
 
     // Funzione gestione errori email
     const handlerEmailError = (value, setError) => {
@@ -62,31 +77,43 @@ const LoginSection = () => {
         }
     };
 
-    // Funzione generatrice di password
-    const pswGenerator = (length) => {
-        const data =
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?. ,-_@#';
-        let psw = '';
-
-        while (
-            !/^(?=[A-Za-z0-9!?. ,\-_@#]{8,255}$)(?=.*[0-9])(?=.*[!?. ,\-_@#])(?!.*[\s()])/.test(
-                psw
-            )
-        ) {
-            psw = '';
-            for (let i = 0; i < length; i++) {
-                psw += data[Math.floor(Math.random() * data.length)];
-            }
+    // Controllo errore
+    useEffect(() => {
+        if (error.page !== null) {
+            notify('error', error.page);
+            setError({ ...error, page: null });
         }
-
-        return psw;
-    };
+    }, [error.page]);
 
     // Funzione autenticazione account
-    const handlerLogin = () => {
-        // TODO Richiesta api di autenticazione
-        notify('success', 'Autenticazione effettuata correttamente!');
-        navigator('/dashboard');
+    const handlerLogin = async () => {
+        // Errori locali
+        let localErrors = {};
+        // Controllo errori
+        handlerEmailError(email, (value) => (localErrors.email = value));
+        handlerPasswordError(
+            password,
+            (value) => (localErrors.password = value)
+        );
+        const result = Object.values(localErrors).every((v) => v == null)
+            ? await login(
+                  email,
+                  password,
+                  (value) => setError({ ...error, page: value }),
+                  setLoading
+              )
+            : 'bad request';
+
+        // Impostazione errori
+        setError((prev) => ({ ...prev, ...localErrors }));
+
+        // Controllo risultati
+        if (result && result !== 'bad request') {
+            notify('success', 'Autenticazione effettuata correttamente!');
+            navigator('/dashboard');
+        } else if (result !== 'bad request') {
+            setPassword('');
+        }
     };
 
     return (
@@ -95,18 +122,30 @@ const LoginSection = () => {
                 <h1 className="text-3xlarge font-extrabold">Bentornato!👋</h1>
                 <Input
                     placeHolder={"Inserisci l'Email"}
-                    errorHandler={handlerEmailError}
-                    defValue="email@email.com"
+                    value={email}
+                    setValue={setEmail}
+                    inputError={error.email}
+                    setInputError={(value) =>
+                        setError((prev) => ({ ...prev, email: value }))
+                    }
                 />
                 <Input
                     placeHolder={'Inserisci la Password'}
-                    errorHandler={handlerPasswordError}
-                    defValue={() => pswGenerator(20)}
+                    value={password}
+                    setValue={setPassword}
+                    inputError={error.password}
+                    setInputError={(value) =>
+                        setError((prev) => ({ ...prev, password: value }))
+                    }
                     type="password"
                 />
-                <Button className="text-[#fff]" onClick={handlerLogin}>
-                    Accedi
-                </Button>
+                {loading ? (
+                    <Spinner />
+                ) : (
+                    <Button className="text-[#fff]" onClick={handlerLogin}>
+                        Accedi
+                    </Button>
+                )}
                 <p className="text-small">
                     Non hai ancora un account?{' '}
                     <Link

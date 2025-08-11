@@ -20,6 +20,7 @@ const NotificationProvider = ({ children }) => {
         if (notificationShow) {
             const idTimeout = setTimeout(() => {
                 setNotificationShow(false);
+                setNotification({});
             }, 4000);
             return () => clearTimeout(idTimeout);
         }

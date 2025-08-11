@@ -75,4 +75,24 @@ const formatRecurrency = (intervalStr, type) => {
     }
 };
 
-export { formatCurrency, formatCurrencyColor, formatRecurrency };
+// Funzione generatrice di password
+const pswGenerator = (length) => {
+    const data =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?. ,-_@#';
+    let psw = '';
+
+    while (
+        !/^(?=[A-Za-z0-9!?. ,\-_@#]{8,255}$)(?=.*[0-9])(?=.*[!?. ,\-_@#])(?!.*[\s()])/.test(
+            psw
+        )
+    ) {
+        psw = '';
+        for (let i = 0; i < length; i++) {
+            psw += data[Math.floor(Math.random() * data.length)];
+        }
+    }
+
+    return psw;
+};
+
+export { formatCurrency, formatCurrencyColor, formatRecurrency, pswGenerator };

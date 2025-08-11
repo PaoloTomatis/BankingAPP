@@ -20,7 +20,7 @@ const logout = async (req, res) => {
 
         // Richiesta utente tramite refresh token
         const [[user]] = await pool.query(
-            'SELECT id FROM users WHERE refreshToken = ?',
+            'SELECT id FROM users WHERE refresh_token = ?',
             [refreshToken]
         );
 
@@ -41,7 +41,7 @@ const logout = async (req, res) => {
             );
 
         // Rimuovo il refresh token dal database
-        await pool.query('UPDATE users SET refreshToken = ? WHERE id = ?', [
+        await pool.query('UPDATE users SET refresh_token = ? WHERE id = ?', [
             null,
             user.id,
         ]);

@@ -107,6 +107,7 @@ const DashboardSection2 = ({ walletId }) => {
     useEffect(() => {
         if (error) {
             notify('error', error);
+            setError(null);
         }
     }, [error]);
 

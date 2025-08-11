@@ -46,7 +46,8 @@ const Wallet = ({ id, name, handleDelete }) => {
     // Controllo errore
     useEffect(() => {
         if (error) {
-            console.log(error);
+            notify('error', error);
+            setError(null);
         }
     }, [error]);
 

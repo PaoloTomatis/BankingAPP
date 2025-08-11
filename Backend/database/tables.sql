@@ -6,7 +6,7 @@ CREATE TABLE users (
     username VARCHAR(30) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     psw VARCHAR(255) NOT NULL,
-    refresh_token VARCHAR(255) NOT NULL,
+    refresh_token VARCHAR(255),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );

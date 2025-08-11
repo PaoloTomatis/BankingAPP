@@ -26,7 +26,7 @@ const router = createBrowserRouter([
     {
         path: '/',
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute auth={true}>
                 <Dashboard />
             </ProtectedRoute>
         ),
@@ -34,7 +34,7 @@ const router = createBrowserRouter([
     {
         path: '/dashboard',
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute auth={true}>
                 <Dashboard />
             </ProtectedRoute>
         ),
@@ -42,7 +42,7 @@ const router = createBrowserRouter([
     {
         path: '/dashboard/:id',
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute auth={true}>
                 <Dashboard />
             </ProtectedRoute>
         ),
@@ -74,7 +74,7 @@ const router = createBrowserRouter([
     {
         path: '/tags',
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute auth={true}>
                 <Tags />
             </ProtectedRoute>
         ),
@@ -82,7 +82,7 @@ const router = createBrowserRouter([
     {
         path: '/transactions',
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute auth={true}>
                 <Transactions />
             </ProtectedRoute>
         ),
@@ -90,7 +90,7 @@ const router = createBrowserRouter([
     {
         path: '/transactions-history',
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute auth={true}>
                 <TransactionsHistory />
             </ProtectedRoute>
         ),
@@ -98,7 +98,7 @@ const router = createBrowserRouter([
     {
         path: '/transactions-recurrent',
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute auth={true}>
                 <TransactionsRecurrent />
             </ProtectedRoute>
         ),
@@ -106,7 +106,7 @@ const router = createBrowserRouter([
     {
         path: '/account',
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute auth={true}>
                 <Account />
             </ProtectedRoute>
         ),
@@ -132,7 +132,7 @@ createRoot(document.getElementById('root')).render(
             <NotificationProvider>
                 <PopupProvider>
                     <TransactionActionProvider>
-                        <RouterProvider router={router} />
+                        <RouterProvider router={router}></RouterProvider>
                     </TransactionActionProvider>
                 </PopupProvider>
             </NotificationProvider>
