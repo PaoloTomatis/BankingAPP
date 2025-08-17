@@ -1,8 +1,8 @@
 // Importazione moduli
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/Auth.context';
 import { useNotification } from '../hooks/Notification.context';
-import { usePopup } from '../hooks/Popup.context';
 // Importazione immagini
 import modifyImgBLK from '../assets/icons/pen-BLK.png';
 import deleteImgBLK from '../assets/icons/delete-BLK.png';
@@ -11,10 +11,10 @@ import addImgBLK from '../assets/icons/add-BLK.png';
 
 // Creazione componente
 const Wallet = ({ id, name, handleDelete }) => {
+    // Autenticazione
+    const { accessToken } = useAuth();
     // Notificatore
     const notify = useNotification();
-    // Poppuper
-    const popup = usePopup();
     // Navigatore
     const navigator = useNavigate();
     // Stato input
@@ -52,18 +52,48 @@ const Wallet = ({ id, name, handleDelete }) => {
     }, [error]);
 
     // Funzione gestione modifica portafoglio
-    const handleModify = () => {
-        // Controllo nome portafoglio
-        if (!error && currentWallet.name !== input) {
-            //TODO - Faccio richiesta modifica portafoglio
-            notify(
-                'success',
-                'Il portafoglio è stato modificato correttamente!'
-            );
-            // Aggiornamento portafoglio
+    const handleModify = async () => {
+        const prevCurrentWallet = { ...currentWallet };
+        try {
             setCurrentWallet({ ...currentWallet, name: input });
-        } else {
-            setInput(currentWallet.name);
+            // Controllo nome portafoglio
+            if (!error && currentWallet.name !== input) {
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/wallets`,
+                    {
+                        method: 'PATCH',
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            data: { name: input },
+                            where: { id },
+                        }),
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server!'
+                    );
+
+                notify(
+                    'success',
+                    'Il portafoglio è stato modificato correttamente!'
+                );
+            } else {
+                setInput(currentWallet.name);
+                setCurrentWallet(prevCurrentWallet);
+            }
+        } catch (error) {
+            notify('error', error.message);
         }
     };
 

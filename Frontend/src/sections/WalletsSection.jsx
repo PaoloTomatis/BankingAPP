@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNotification } from '../hooks/Notification.context';
 import { usePopup } from '../hooks/Popup.context';
+import { useAuth } from '../hooks/Auth.context';
 // Importazione componenti
 import Input from '../components/Input';
 import Wallet from '../components/Wallet';
@@ -21,23 +22,45 @@ const WalletsSection = () => {
     const [loading, setLoading] = useState(true);
     // Stato errore
     const [error, setError] = useState(null);
+    // Autenticazione
+    const { accessToken } = useAuth();
 
     // Caricamento dati
     useEffect(() => {
         try {
-            //TODO - Effettuo chiamata API
-            setTimeout(() => {
-                setWallets([
-                    { id: 1, name: 'Portafoglio 1' },
-                    { id: 2, name: 'Portafoglio 2' },
-                    { id: 3, name: 'Portafoglio 3' },
-                ]);
-                setLoading(false);
-            }, 1000);
+            const getWallets = async () => {
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/wallets`,
+                    {
+                        credentials: 'include',
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server'
+                    );
+
+                // Impostazione portafogli
+                setWallets(
+                    data.data.map((wallet) => {
+                        return { id: wallet.id, name: wallet.name };
+                    })
+                );
+            };
+
+            getWallets();
         } catch (error) {
             setError(error.message);
         } finally {
-            // setLoading(false);
+            setLoading(false);
         }
     }, []);
 
@@ -50,25 +73,79 @@ const WalletsSection = () => {
     }, [error]);
 
     // Funzione gestione creazione portafoglio
-    const handlerInput = (value, setValue, setError) => {
-        const sanitizedValue = value.replace(/\s+/g, '');
+    const handlerInput = async (value, setValue, setError) => {
+        // Backup portafogli
+        const prevWallets = [...wallets];
 
-        // Controllo value
-        if (
-            sanitizedValue &&
-            sanitizedValue?.length >= 3 &&
-            sanitizedValue?.length <= 30
-        ) {
-            // Gestione valore
-            //TODO - Faccio richiesta aggiunta portafoglio
-            //TODO - Mancanza id alle nuove transazioni (dovrei ricevere id da backend)
-            setWallets([...wallets, { name: value }]);
-            // Cancello testo e errore
-            setValue('Nuovo Portafoglio');
-            setError(null);
-        } else if (sanitizedValue?.length < 3 || sanitizedValue?.length > 30) {
-            // Gestione errore
-            setError('Il nome deve essere compreso tra i 3 e i 30 caratteri');
+        try {
+            const sanitizedValue = value.replace(/\s+/g, '');
+
+            const result = wallets.find((wallet) => wallet.id === 'waiting');
+
+            // Controllo value
+            if (
+                !result &&
+                sanitizedValue &&
+                sanitizedValue?.length >= 3 &&
+                sanitizedValue?.length <= 30
+            ) {
+                // Impostazione nuovo portafoglio
+                setWallets([...wallets, { id: 'waiting', name: value }]);
+
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/wallets`,
+                    {
+                        credentials: 'include',
+                        method: 'POST',
+                        body: JSON.stringify({
+                            data: { name: value },
+                        }),
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server'
+                    );
+
+                setWallets((prevWalletsMap) =>
+                    prevWalletsMap.map((wallet) =>
+                        wallet.id === 'waiting'
+                            ? { id: data.data.id, name: wallet.name }
+                            : wallet
+                    )
+                );
+
+                // Cancello testo e errore
+                setValue('Nuovo Portafoglio');
+                setError(null);
+            } else if (
+                sanitizedValue?.length < 3 ||
+                sanitizedValue?.length > 30
+            ) {
+                // Gestione errore
+                setError(
+                    'Il nome deve essere compreso tra i 3 e i 30 caratteri'
+                );
+            } else if (result) {
+                // Gestione errore
+                notify(
+                    'error',
+                    'Un portafoglio deve ancora essere caricato in rete, attendi'
+                );
+            }
+        } catch (error) {
+            notify('error', error.message);
+            setWallets(prevWallets);
         }
     };
 
@@ -78,13 +155,41 @@ const WalletsSection = () => {
             'Conferma ELIMINAZIONE',
             `Eliminando "${name.toUpperCase()}" non sarà più possibile utilizzarlo e tutte le sue transazioni saranno anch'esse irrecuperabili. Quest'azione è irreversibile!`,
             'Procedi',
-            () => {
-                //TODO - Faccio richiesta eliminazione portafoglio
-                setWallets(wallets.filter((wallet) => wallet.id !== id));
-                notify(
-                    'success',
-                    'Il Portafoglio è stato eliminato correttamente!'
-                );
+            async () => {
+                // Backup portafogli
+                const prevWallets = [...wallets];
+
+                try {
+                    setWallets(wallets.filter((wallet) => wallet.id !== id));
+                    // Effettuazione richiesta
+                    const req = await fetch(
+                        `${import.meta.env.VITE_API_URL}/api/wallets/${id}`,
+                        {
+                            credentials: 'include',
+                            method: 'DELETE',
+                            headers: {
+                                Authorization: `Bearer ${accessToken}`,
+                            },
+                        }
+                    );
+
+                    // Conversione richiesta
+                    const data = await req.json();
+
+                    // Controllo richiesta
+                    if (!req.ok)
+                        throw new Error(
+                            data?.message || 'Errore interno del server'
+                        );
+
+                    notify(
+                        'success',
+                        'Il Portafoglio è stato eliminato correttamente!'
+                    );
+                } catch (error) {
+                    notify('error', error.message);
+                    setWallets(prevWallets);
+                }
             }
         );
     };
@@ -103,16 +208,22 @@ const WalletsSection = () => {
                             addHandler={handlerInput}
                             defValue="Nuovo Portafoglio"
                         />
-                        {wallets.map((wallet) => {
-                            return (
-                                <Wallet
-                                    key={wallet.id}
-                                    id={wallet.id}
-                                    name={wallet.name}
-                                    handleDelete={handleDelete}
-                                />
-                            );
-                        })}
+                        {wallets.length <= 0 ? (
+                            <p className="text-center">
+                                Non sono presenti portafogli!
+                            </p>
+                        ) : (
+                            wallets.map((wallet) => {
+                                return (
+                                    <Wallet
+                                        key={wallet.id}
+                                        id={wallet.id}
+                                        name={wallet.name}
+                                        handleDelete={handleDelete}
+                                    />
+                                );
+                            })
+                        )}
                     </>
                 )}
             </div>

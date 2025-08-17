@@ -74,6 +74,20 @@ const postTags = async (req, res) => {
                 'Login non effettuato correttamente!'
             );
 
+        // Esecuzione richiesta categoria
+        const [[duplicateTag]] = await pool.query(
+            'SELECT id FROM tags WHERE name = ? AND user_id = ?',
+            [name || '', userId]
+        );
+
+        if (duplicateTag)
+            return responseHandler(
+                res,
+                409,
+                false,
+                'Il nome del tag è già in uso!'
+            );
+
         // Controllo dati ricevuti
         if (
             !name ||
@@ -124,7 +138,7 @@ const patchTag = async (req, res) => {
     try {
         // Ricevo dati dalla richiesta
         const { id: tagId } = req.body && req.body.where ? req.body.where : {};
-        const { name } = req.body && req.body.data ? req.body.data : {};
+        const { name, color } = req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
         // Liste per creazione query
@@ -149,6 +163,20 @@ const patchTag = async (req, res) => {
                 'Dati mancanti o invalidi!'
             );
 
+        // Esecuzione richiesta categoria
+        const [duplicateTag] = await pool.query(
+            'SELECT id FROM tags WHERE name = ? AND user_id = ?',
+            [name || '', userId]
+        );
+
+        if (duplicateTag?.length > 1)
+            return responseHandler(
+                res,
+                409,
+                false,
+                'Il nome del tag è già in uso!'
+            );
+
         // Aggiunta valori alle liste per creazione della query
         if (
             name &&
@@ -160,9 +188,16 @@ const patchTag = async (req, res) => {
             values.push(name);
         }
 
-        if (tagId && !isNaN(tagId)) {
-            fields.push('tag_id = ?');
-            values.push(tagId);
+        console.log(color);
+
+        if (
+            color &&
+            color?.length <= 7 &&
+            color?.length >= 4 &&
+            typeof color == 'string'
+        ) {
+            fields.push('color = ?');
+            values.push(color);
         }
 
         // Controllo dati ricevuti
@@ -180,7 +215,7 @@ const patchTag = async (req, res) => {
 
         // Esecuzione aggiornamento categoria
         await pool.query(
-            `UPDATE tags SET ${fields.join(', ')} WHERE id = ? AND userId = ?`,
+            `UPDATE tags SET ${fields.join(', ')} WHERE id = ? AND user_id = ?`,
             values
         );
 

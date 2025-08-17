@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNotification } from '../hooks/Notification.context';
 import { usePopup } from '../hooks/Popup.context';
+import { useAuth } from '../hooks/Auth.context';
 // Importazione componenti
 import Transaction from '../components/Transaction';
 import Spinner from '../components/Spinner';
@@ -23,6 +24,8 @@ const TransactionsSection = ({ className, recurrents = false }) => {
     const [loading, setLoading] = useState(true);
     // Stato errore
     const [error, setError] = useState(null);
+    // Autenticazione
+    const { accessToken } = useAuth();
 
     // Funzione gestione eliminazione transazione
     const handleDelete = (id) => {
@@ -30,143 +33,331 @@ const TransactionsSection = ({ className, recurrents = false }) => {
             'Conferma ELIMINAZIONE',
             "Eliminando la TRANSAZIONE essa non sarà più reperibile e ciò influirà nel calcolo del bilancio. Quest'azione è irreversibile!",
             'Procedi',
-            () => {
-                //TODO - Faccio richiesta eliminazione transazione
-                setTransactions(
-                    transactions.filter((transaction) => transaction.id !== id)
-                );
-                notify(
-                    'success',
-                    'La Transazione è stata eliminata correttamente!'
-                );
+            async () => {
+                const prevTransactions = [...transactions];
+                try {
+                    setTransactions(
+                        transactions.filter(
+                            (transaction) => transaction.id !== id
+                        )
+                    );
+
+                    if (!recurrents) {
+                        // Effettuazione richiesta
+                        const req = await fetch(
+                            `${
+                                import.meta.env.VITE_API_URL
+                            }/api/transactions/${id}`,
+                            {
+                                credentials: 'include',
+                                method: 'DELETE',
+                                headers: {
+                                    Authorization: `Bearer ${accessToken}`,
+                                },
+                            }
+                        );
+
+                        // Conversione richiesta
+                        const data = await req.json();
+
+                        // Controllo richiesa
+                        if (!req.ok)
+                            throw new Error(
+                                data?.message || 'Errore interno del server!'
+                            );
+                    } else {
+                        // Effettuazione richiesta
+                        const req = await fetch(
+                            `${
+                                import.meta.env.VITE_API_URL
+                            }/api/recurring-transactions/${id}`,
+                            {
+                                credentials: 'include',
+                                method: 'DELETE',
+                                headers: {
+                                    Authorization: `Bearer ${accessToken}`,
+                                },
+                            }
+                        );
+
+                        // Conversione richiesta
+                        const data = await req.json();
+
+                        // Controllo richiesa
+                        if (!req.ok)
+                            throw new Error(
+                                data?.message || 'Errore interno del server!'
+                            );
+                    }
+
+                    notify(
+                        'success',
+                        'La Transazione è stata eliminata correttamente!'
+                    );
+                } catch (error) {
+                    notify('error', error.message);
+                    setTransactions(prevTransactions);
+                }
             }
         );
     };
 
     // Funzione gestione creazione portafoglio
-    const handlerInput = (value, setValue, setError) => {
-        // Sanificazione input
-        const sanitizedValue = Math.round(parseFloat(value) * 100) / 100;
+    const handlerInput = async (value, setValue, setError) => {
+        // Backup transazioni
+        const prevTransactions = [...transactions];
 
-        // Controllo value
-        if (
-            (sanitizedValue != 0 || !sanitizedValue) &&
-            !isNaN(sanitizedValue)
-        ) {
-            const date = new Date().toISOString().slice(0, 10);
+        try {
+            // Sanificazione input
+            const sanitizedValue = Math.round(parseFloat(value) * 100) / 100;
 
-            // Gestione valore
-            //TODO - Faccio richiesta aggiunta importo
-            //TODO - Mancanza id alle nuove transazioni (dovrei ricevere id da backend)
-            setTransactions(
-                !recurrents
-                    ? [
-                          ...transactions,
-                          {
-                              amount: Math.abs(sanitizedValue),
-                              walletId: 1,
-                              tagId: null,
-                              userId: 1,
-                              date: date,
-                              type: sanitizedValue >= 0 ? 'income' : 'expense',
-                          },
-                      ]
-                    : [
-                          ...transactions,
-                          {
-                              userId: 1,
-                              walletId: 1,
-                              tagId: null,
-                              amount: Math.abs(sanitizedValue),
-                              type: sanitizedValue >= 0 ? 'income' : 'expense',
-                              recurrence: '1m',
-                              last_date: new Date().toISOString(),
-                          },
-                      ]
+            const result = transactions.find(
+                (transaction) => transaction.id === 'waiting'
             );
-            // Cancello testo e errore
-            setValue(0.0);
-            setError(null);
-        } else if (!sanitizedValue || isNaN(sanitizedValue)) {
-            // Gestione errore
-            setError("L'importo deve essere un numero positivo o negativo!");
+
+            // Controllo value
+            if (
+                !result &&
+                (sanitizedValue != 0 || !sanitizedValue) &&
+                !isNaN(sanitizedValue)
+            ) {
+                if (!recurrents) {
+                    const date = new Date().toISOString().slice(0, 10);
+
+                    // Impostazione transazione
+                    setTransactions([
+                        ...transactions,
+                        {
+                            id: 'waiting',
+                            amount: Math.abs(sanitizedValue),
+                            wallet_id: null,
+                            tag_id: null,
+                            date: date,
+                            type: sanitizedValue >= 0 ? 'income' : 'expense',
+                        },
+                    ]);
+
+                    // Effettuazione richiesta
+                    const req = await fetch(
+                        `${import.meta.env.VITE_API_URL}/api/transactions`,
+                        {
+                            credentials: 'include',
+                            method: 'POST',
+                            body: JSON.stringify({
+                                data: {
+                                    amount: Math.abs(sanitizedValue),
+                                    wallet_id: null,
+                                    tag_id: null,
+                                    date: date,
+                                    type:
+                                        sanitizedValue >= 0
+                                            ? 'income'
+                                            : 'expense',
+                                },
+                            }),
+                            headers: {
+                                Authorization: `Bearer ${accessToken}`,
+                                'Content-Type': 'application/json',
+                            },
+                        }
+                    );
+
+                    // Conversione richiesta
+                    const data = await req.json();
+
+                    // Controllo richiesta
+                    if (!req.ok)
+                        throw new Error(
+                            data?.message || 'Errore interno del server'
+                        );
+
+                    // Aggiornamento con id
+                    setTransactions((prevTransactions) => {
+                        return prevTransactions.map((transaction) =>
+                            transaction.id === 'waiting'
+                                ? {
+                                      ...transaction,
+                                      id: data.data.id,
+                                      wallet_id: data.data.walletId,
+                                  }
+                                : transaction
+                        );
+                    });
+                } else {
+                    // Impostazione transazione
+                    setTransactions([
+                        ...transactions,
+                        {
+                            id: 'waiting',
+                            amount: Math.abs(sanitizedValue),
+                            wallet_id: null,
+                            tag_id: null,
+                            recurrence: '1m',
+                            last_date: new Date().toISOString(),
+                            type: sanitizedValue >= 0 ? 'income' : 'expense',
+                        },
+                    ]);
+
+                    // Effettuazione richiesta
+                    const req = await fetch(
+                        `${
+                            import.meta.env.VITE_API_URL
+                        }/api/recurring-transactions`,
+                        {
+                            credentials: 'include',
+                            method: 'POST',
+                            body: JSON.stringify({
+                                data: {
+                                    amount: Math.abs(sanitizedValue),
+                                    walletId: null,
+                                    tagId: null,
+                                    recurrence: '1m',
+                                    lastDate: new Date().toISOString(),
+                                    type:
+                                        sanitizedValue >= 0
+                                            ? 'income'
+                                            : 'expense',
+                                },
+                            }),
+                            headers: {
+                                Authorization: `Bearer ${accessToken}`,
+                                'Content-Type': 'application/json',
+                            },
+                        }
+                    );
+
+                    // Conversione richiesta
+                    const data = await req.json();
+
+                    // Controllo richiesta
+                    if (!req.ok)
+                        throw new Error(
+                            data?.message || 'Errore interno del server'
+                        );
+
+                    // Aggiornamento con id
+                    setTransactions((prevTransactions) => {
+                        return prevTransactions.map((transaction) =>
+                            transaction.id === 'waiting'
+                                ? {
+                                      ...transaction,
+                                      id: data.data.id,
+                                      wallet_id: data.data.walletId,
+                                  }
+                                : transaction
+                        );
+                    });
+                }
+
+                // Cancello testo e errore
+                setValue(0.0);
+                setError(null);
+            } else if (!sanitizedValue || isNaN(sanitizedValue)) {
+                // Gestione errore
+                setError(
+                    "L'importo deve essere un numero positivo o negativo!"
+                );
+            } else if (result) {
+                // Gestione errore
+                notify(
+                    'error',
+                    'Un portafoglio deve ancora essere caricato in rete, attendi'
+                );
+            }
+        } catch (error) {
+            notify('error', error.message);
+            setTransactions(prevTransactions);
         }
     };
 
     // Caricamento dati
     useEffect(() => {
         try {
-            //TODO - Effettuo chiamata API
-            setTimeout(() => {
-                if (!recurrents) {
-                    setTransactions([
+            if (!recurrents) {
+                const getTransactions = async () => {
+                    // Effettuazione richiesta
+                    const req = await fetch(
+                        `${import.meta.env.VITE_API_URL}/api/transactions`,
                         {
-                            id: 1,
-                            amount: 100,
-                            wallet_id: 1,
-                            type: 'income',
-                            tag_id: 1,
-                            date: '2024-07-03',
-                        },
+                            credentials: 'include',
+                            method: 'GET',
+                            headers: { Authorization: `Bearer ${accessToken}` },
+                        }
+                    );
+
+                    // Conversione richiesta
+                    const data = await req.json();
+
+                    // Controllo richiesta
+                    if (!req.ok)
+                        throw new Error(
+                            data?.message || 'Errore interno del server'
+                        );
+
+                    // Impostazione transazioni
+                    setTransactions(data.data);
+                };
+
+                getTransactions();
+            } else {
+                const getRecurrentTransactions = async () => {
+                    // Effettuazione richiesta
+                    const req = await fetch(
+                        `${
+                            import.meta.env.VITE_API_URL
+                        }/api/recurring-transactions`,
                         {
-                            id: 7,
-                            amount: 100,
-                            wallet_id: 1,
-                            type: 'expense',
-                            tag_id: 3,
-                            date: '2025-06-17',
-                        },
-                        {
-                            id: 8,
-                            amount: 100,
-                            wallet_id: 1,
-                            type: 'expense',
-                            tag_id: 2,
-                            date: '2025-08-05',
-                        },
-                    ]);
-                } else {
-                    setTransactions([
-                        {
-                            id: 1,
-                            amount: 100,
-                            wallet_id: 1,
-                            type: 'income',
-                            tag_id: 1,
-                            recurrence: '1m',
-                            last_date: '2024-07-03T16:00:00.000Z',
-                        },
-                        {
-                            id: 7,
-                            amount: 100,
-                            wallet_id: 1,
-                            type: 'expense',
-                            tag_id: 3,
-                            recurrence: '2d',
-                            last_date: '2025-06-17T11:11:11.111Z',
-                        },
-                        {
-                            id: 8,
-                            amount: 100,
-                            wallet_id: 1,
-                            type: 'expense',
-                            tag_id: 2,
-                            recurrence: '3y',
-                            last_date: '2025-08-05T14:45:10.000Z',
-                        },
-                    ]);
-                }
-                setTags([
-                    { id: 1, color: '#F44336' },
-                    { id: 2, color: '#FFC107' },
-                    { id: 3, color: '#3A7CD9' },
-                ]);
-                setLoading(false);
-            }, 1000);
+                            credentials: 'include',
+                            method: 'GET',
+                            headers: { Authorization: `Bearer ${accessToken}` },
+                        }
+                    );
+
+                    // Conversione richiesta
+                    const data = await req.json();
+
+                    // Controllo richiesta
+                    if (!req.ok)
+                        throw new Error(
+                            data?.message || 'Errore interno del server'
+                        );
+
+                    // Impostazione transazioni
+                    setTransactions(data.data);
+                };
+
+                getRecurrentTransactions();
+            }
+
+            const getTags = async () => {
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/tags`,
+                    {
+                        credentials: 'include',
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server'
+                    );
+
+                // Impostazione tags
+                setTags(data.data);
+            };
+
+            getTags();
         } catch (error) {
             setError(error.message);
         } finally {
-            // setLoading(false);
+            setLoading(false);
         }
     }, []);
 
@@ -196,35 +387,41 @@ const TransactionsSection = ({ className, recurrents = false }) => {
                     <div
                         className={`${className} w-full gap-4 flex flex-col items-center`}
                     >
-                        {transactions.map((transaction) => {
-                            return (
-                                <Transaction
-                                    key={transaction.id}
-                                    id={transaction.id}
-                                    amount={transaction.amount}
-                                    type={transaction.type}
-                                    date={
-                                        !recurrents
-                                            ? transaction.date
-                                            : transaction.recurrence
-                                    }
-                                    recurrent={recurrents ? true : false}
-                                    tagColor={
-                                        tags[
-                                            tags.findIndex(
-                                                (tag) =>
-                                                    tag.id ===
-                                                    transaction.tag_id
-                                            )
-                                        ]?.color || '#000000'
-                                    }
-                                    actionBtn={true}
-                                    tagId={transaction.tag_id}
-                                    walletId={transaction.wallet_id}
-                                    handleDelete={handleDelete}
-                                />
-                            );
-                        })}
+                        {transactions?.length <= 0 || !transactions ? (
+                            <p className="text-center">
+                                Non sono presenti transazioni
+                            </p>
+                        ) : (
+                            transactions.map((transaction) => {
+                                return (
+                                    <Transaction
+                                        key={transaction.id}
+                                        id={transaction.id}
+                                        amount={transaction.amount}
+                                        type={transaction.type}
+                                        date={
+                                            !recurrents
+                                                ? transaction.date
+                                                : transaction.recurrence
+                                        }
+                                        recurrent={recurrents ? true : false}
+                                        tagColor={
+                                            tags[
+                                                tags.findIndex(
+                                                    (tag) =>
+                                                        tag.id ===
+                                                        transaction.tag_id
+                                                )
+                                            ]?.color || '#000000'
+                                        }
+                                        actionBtn={true}
+                                        tagId={transaction.tag_id}
+                                        walletId={transaction.wallet_id}
+                                        handleDelete={handleDelete}
+                                    />
+                                );
+                            })
+                        )}
                     </div>
                 </>
             )}

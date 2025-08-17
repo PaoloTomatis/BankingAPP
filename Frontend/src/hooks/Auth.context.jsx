@@ -11,6 +11,8 @@ const AuthProvider = ({ children }) => {
     const [accessToken, setAccessToken] = useState(null);
     // Stato utente
     const [user, setUser] = useState(null);
+    // Stato caricamento
+    const [loading, setLoading] = useState(true);
 
     // Caricamento dati
     useEffect(() => {
@@ -18,8 +20,36 @@ const AuthProvider = ({ children }) => {
         if (localStorage.getItem('accessToken')) {
             // Impostazione token
             setAccessToken(localStorage.getItem('accessToken'));
+        } else {
+            setLoading(false);
         }
     }, []);
+
+    // Funzione richiesta refresh
+    const getRefresh = async () => {
+        // Effettuazione richiesta
+        const req = await fetch(
+            `${import.meta.env.VITE_API_URL}/auth/refresh`,
+            { credentials: 'include', method: 'GET' }
+        );
+        // Controllo richiesta
+        if (!req.ok) {
+            // Cancellazione token e utente
+            setAccessToken(null);
+            setUser(null);
+            localStorage.removeItem('accessToken');
+            // Reidirizzamento
+            console.log('Reindirizzamento: ', accessToken);
+            window.location = '/auth/login';
+            return;
+        }
+
+        // Conversione richiesta
+        const data = await req.json();
+
+        // Impostazione token
+        setAccessToken(data.data);
+    };
 
     // Controllo token
     useEffect(() => {
@@ -34,39 +64,11 @@ const AuthProvider = ({ children }) => {
                         email: decodedToken.email,
                     });
                 }
-            } catch (error) {
-                console.error(error.message);
-            }
 
-            // Funzion richiesta refresh
-            const getRefresh = async () => {
-                // Effettuazione richiesta
-                const req = await fetch(
-                    `${import.meta.env.VITE_API_URL}/auth/refresh`,
-                    { credentials: 'include', method: 'GET' }
-                );
-                // Controllo richiesta
-                if (!req.ok) {
-                    // Cancellazione token e utente
-                    setAccessToken(null);
-                    setUser(null);
-                    localStorage.removeItem('accessToken');
-                    // Reidirizzamento
-                    window.location = '/auth/login';
-                    return;
-                }
-
-                // Conversione richiesta
-                const data = await req.json();
-
-                // Impostazione token
-                setAccessToken(data.data);
-            };
-
-            try {
                 // Controllo scadenza
                 if (new Date() > new Date(jwtDecode(accessToken)?.exp * 1000)) {
                     // Richiesta refresh
+                    console.log('Scadenza: ', accessToken);
                     getRefresh();
                 }
                 // Timeout alla scadenza
@@ -81,6 +83,8 @@ const AuthProvider = ({ children }) => {
                 setAccessToken(null);
                 setUser(null);
                 localStorage.removeItem('accessToken');
+            } finally {
+                setLoading(false);
             }
         }
     }, [accessToken]);
@@ -194,7 +198,7 @@ const AuthProvider = ({ children }) => {
             setLoading(true);
             // Effettuazione richiesta
             const req = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/user`,
+                `${import.meta.env.VITE_API_URL}/api/users`,
                 {
                     credentials: 'include',
                     method: 'DELETE',
@@ -212,9 +216,11 @@ const AuthProvider = ({ children }) => {
             setAccessToken(null);
             setUser(null);
             localStorage.removeItem('accessToken');
+            return true;
         } catch (error) {
             // Impostazione errore
             setError(error.message);
+            return false;
         } finally {
             // Eliminazione caricamento
             setLoading(false);
@@ -223,7 +229,15 @@ const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider
-            value={{ accessToken, user, login, signup, logout, userDelete }}
+            value={{
+                accessToken,
+                user,
+                login,
+                signup,
+                logout,
+                userDelete,
+                loading,
+            }}
         >
             {children}
         </AuthContext.Provider>

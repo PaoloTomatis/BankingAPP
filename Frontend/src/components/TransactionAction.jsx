@@ -1,6 +1,7 @@
 // Importazione moduli
 import { useEffect, useState } from 'react';
 import { useNotification } from '../hooks/Notification.context';
+import { useAuth } from '../hooks/Auth.context';
 // Importazione componenti
 import Button from '../components/Button';
 import Spinner from '../components/Spinner';
@@ -15,18 +16,7 @@ const TransactionAction = ({
     recurrent,
 }) => {
     const oggi = new Date();
-    const giorno = String(oggi.getDate()).padStart(2, '0');
-    const mese = String(oggi.getMonth() + 1).padStart(2, '0');
-    const anno = oggi.getFullYear();
 
-    // Transazione originale
-    // const originalTransaction = {
-    //     id: defId,
-    //     amount: type === 'income' ? defAmount : -defAmount,
-    //     date: defDate || `${anno}-${mese}-${giorno}`,
-    //     walletId: defWalletId,
-    //     tagId: defTagId,
-    // };
     const originalTransaction = transaction;
     // Notificatore
     const notify = useNotification();
@@ -40,28 +30,71 @@ const TransactionAction = ({
     const [loading, setLoading] = useState(true);
     // Stato transazione locale
     const [localTransaction, setLocalTransaction] = useState(transaction);
+    // Autenticazione
+    const { accessToken } = useAuth();
 
     // Caricamento dati
     useEffect(() => {
         try {
-            //TODO - Effettuo chiamata API
-            setTimeout(() => {
-                setTags([
-                    { id: 1, name: 'Tag1', color: '#F44336' },
-                    { id: 2, name: 'Tag2', color: '#FFC107' },
-                    { id: 3, name: 'Tag3', color: '#3A7CD9' },
-                ]);
-                setWallets([
-                    { id: 1, name: 'Portafoglio 1' },
-                    { id: 2, name: 'Portafoglio 2' },
-                    { id: 3, name: 'Portafoglio 3' },
-                ]);
-                setLoading(false);
-            }, 500);
+            const getTags = async () => {
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/tags`,
+                    {
+                        credentials: 'include',
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server'
+                    );
+
+                // Impostazione tags
+                setTags(data.data);
+            };
+
+            getTags();
+
+            const getWallets = async () => {
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/wallets`,
+                    {
+                        credentials: 'include',
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server'
+                    );
+
+                // Impostazione portafogli
+                setWallets(
+                    data.data.map((wallet) => {
+                        return { id: wallet.id, name: wallet.name };
+                    })
+                );
+            };
+
+            getWallets();
         } catch (error) {
             setError(error.message);
         } finally {
-            // setLoading(false);
+            setLoading(false);
         }
     }, []);
 
@@ -74,7 +107,8 @@ const TransactionAction = ({
     }, [error]);
 
     // Funzione gestione salvataggio
-    const handleSave = () => {
+    const handleSave = async () => {
+        const prevLocalTransaction = { ...localTransaction };
         try {
             const keys1 = Object.keys(localTransaction);
             let save = false;
@@ -87,13 +121,44 @@ const TransactionAction = ({
 
             // Esecuzione salvataggio
             if (save && !recurrent) {
-                //TODO - Effettuo chiamata API
                 setTransaction({
                     ...localTransaction,
                     amount: parseFloat(localTransaction.amount),
                     walletId: Number(localTransaction.walletId),
                     tagId: Number(localTransaction.tagId),
                 });
+
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/transactions`,
+                    {
+                        credentials: 'include',
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            data: {
+                                ...localTransaction,
+                                amount: parseFloat(localTransaction.amount),
+                                walletId: Number(localTransaction.walletId),
+                                tagId: Number(localTransaction.tagId),
+                            },
+                            where: { id: localTransaction.id },
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server!'
+                    );
+
                 notify(
                     'success',
                     'La transazione è stata modificata correttamente!'
@@ -107,8 +172,44 @@ const TransactionAction = ({
                     ) &&
                     !isNaN(localTransaction.date.slice(0, -1))
                 ) {
-                    //TODO - Effettuo chiamata API
-                    setTransaction(localTransaction);
+                    setTransaction({
+                        ...localTransaction,
+                        amount: parseFloat(localTransaction.amount),
+                        walletId: Number(localTransaction.walletId),
+                        tagId: Number(localTransaction.tagId),
+                    });
+                    // Effettuazione richiesta
+                    const req = await fetch(
+                        `${
+                            import.meta.env.VITE_API_URL
+                        }/api/recurring-transactions`,
+                        {
+                            credentials: 'include',
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                data: {
+                                    ...localTransaction,
+                                    amount: parseFloat(localTransaction.amount),
+                                    walletId: Number(localTransaction.walletId),
+                                    tagId: Number(localTransaction.tagId),
+                                },
+                                where: { id: localTransaction.id },
+                            }),
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${accessToken}`,
+                            },
+                        }
+                    );
+
+                    // Conversione richiesta
+                    const data = await req.json();
+
+                    // Controllo richiesta
+                    if (!req.ok)
+                        throw new Error(
+                            data?.message || 'Errore interno del server!'
+                        );
                     notify(
                         'success',
                         'La transazione è stata modificata correttamente!'
@@ -121,7 +222,8 @@ const TransactionAction = ({
                 }
             }
         } catch (error) {
-            setError(error.message);
+            notify('error', error.message);
+            setLocalTransaction(prevLocalTransaction);
         } finally {
             setShow(false);
         }

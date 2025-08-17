@@ -11,7 +11,15 @@ const getTransactions = async (req, res) => {
         const { id: userId } = req.user ? req.user : {};
 
         // Lista di possibili campi
-        const possibleFields = ['id', 'username', 'email', 'created_at'];
+        const possibleFields = [
+            'id',
+            'user_id',
+            'wallet_id',
+            'type',
+            'tag_id',
+            'date',
+            'created_at',
+        ];
 
         // Lista di transazioni
         let transactions = [];
@@ -44,7 +52,7 @@ const getTransactions = async (req, res) => {
 
             // Richiesta transazioni tramite id dell'utente e identificativo
             [transactions] = await pool.query(
-                'SELECT * FROM transactions WHERE userId = ? AND ?? = ?',
+                'SELECT * FROM transactions WHERE user_id = ? AND ?? = ?',
                 [userId, field, identificative]
             );
         }
@@ -64,8 +72,9 @@ const postTransactions = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { walletId, type, tagId, amount, date } =
+        const { type, tagId, amount, date } =
             req.body && req.body.data ? req.body.data : {};
+        let { walletId } = req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
         // Lista di possibili tipi
@@ -82,7 +91,6 @@ const postTransactions = async (req, res) => {
 
         // Controllo dati ricevuti
         if (
-            !walletId ||
             !type ||
             !amount ||
             !date ||
@@ -96,6 +104,21 @@ const postTransactions = async (req, res) => {
                 400,
                 false,
                 'Dati mancanti o invalidi!'
+            );
+
+        const [walletsId] = await pool.query(
+            'SELECT id FROM wallets WHERE user_id = ?',
+            [userId]
+        );
+
+        if (!walletId && walletsId.length >= 1) {
+            walletId = walletsId[0].id;
+        } else if (!walletId && walletsId.length <= 0)
+            responseHandler(
+                res,
+                400,
+                false,
+                'Non è presente alcun portafoglio'
             );
 
         // Esecuzione aggiunta transazione
@@ -113,15 +136,8 @@ const postTransactions = async (req, res) => {
 
         // Esecuzione richiesta transazione
         const [[transaction]] = await pool.query(
-            'SELECT id FROM transactions WHERE user_id = ? AND wallet_id = ? AND amount = ? AND type = ? AND tag_id = ? AND date = ?',
-            [
-                userId,
-                walletId,
-                parseFloat(amount.toFixed(2)),
-                type,
-                tagId || null,
-                date,
-            ]
+            'SELECT id, wallet_id FROM transactions WHERE user_id = ? AND type = ? AND date = ?',
+            [userId, type, date]
         );
 
         // Invio risposta finale
@@ -130,7 +146,7 @@ const postTransactions = async (req, res) => {
             201,
             true,
             'Transazione creata correttamente!',
-            transaction
+            { id: transaction.id, walletId: transaction['walletId'] }
         );
     } catch (error) {
         // Invio errore alla console
@@ -256,7 +272,7 @@ const deleteTransaction = async (req, res) => {
 
         // Esecuzione query di eliminazione
         await pool.query(
-            'DELETE FROM transactions WHERE userId = ? AND id = ?',
+            'DELETE FROM transactions WHERE user_id = ? AND id = ?',
             [userId, transactionId]
         );
 

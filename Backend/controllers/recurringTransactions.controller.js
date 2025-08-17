@@ -71,8 +71,9 @@ const postRecurringTransactions = async (req, res) => {
     // Blocco try-catch per gestione errori
     try {
         // Ricevo dati dalla richiesta
-        const { name, walletId, amount, type, tagId, recurrence } =
+        const { amount, type, tagId, recurrence, lastDate } =
             req.body && req.body.data ? req.body.data : {};
+        let { walletId } = req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
         // Lista di possibili tipi
@@ -89,12 +90,8 @@ const postRecurringTransactions = async (req, res) => {
 
         // Controllo dati ricevuti
         if (
-            !name ||
-            typeof name !== 'string' ||
-            name?.length > 30 ||
-            name?.length < 3 ||
-            !walletId ||
-            isNaN(walletId) ||
+            !lastDate ||
+            typeof lastDate !== 'string' ||
             !amount ||
             isNaN(amount) ||
             !type ||
@@ -107,33 +104,42 @@ const postRecurringTransactions = async (req, res) => {
                 res,
                 401,
                 false,
-                'Login non effettuato correttamente!'
+                'Dati mancanti o invalidi!'
+            );
+
+        const [walletsId] = await pool.query(
+            'SELECT id FROM wallets WHERE user_id = ?',
+            [userId]
+        );
+
+        if (!walletId && walletsId.length >= 1) {
+            walletId = walletsId[0].id;
+        } else if (!walletId && walletsId.length <= 0)
+            responseHandler(
+                res,
+                400,
+                false,
+                'Non è presente alcun portafoglio'
             );
 
         // Esecuzione inserimento transazione ricorrente
         await pool.query(
-            'INSERT INTO recurring_transactions (name, wallet_id, amount, type, tag_id, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO recurring_transactions (wallet_id, amount, type, tag_id, user_id, last_date, recurrence) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [
-                name,
                 walletId,
                 parseFloat(amount.toFixed(2)),
                 type,
                 tagId || null,
                 userId,
+                lastDate,
+                recurrence,
             ]
         );
 
         // Esecuzione richiesta transazione ricorrente
         const [[recurring_transaction]] = await pool.query(
-            'SELECT id FROM recurring_transactions WHERE name = ? AND wallet_id = ? AND amount = ? AND type = ? AND tag_id = ? AND user_id = ?',
-            [
-                name,
-                walletId,
-                parseFloat(amount.toFixed(2)),
-                type,
-                tagId || null,
-                userId,
-            ]
+            'SELECT id, wallet_id FROM recurring_transactions WHERE wallet_id = ? AND type = ? AND user_id = ? AND recurrence = ? AND last_date = ?',
+            [walletId, type, userId, recurrence, lastDate]
         );
 
         // Invio risposta finale
@@ -142,7 +148,10 @@ const postRecurringTransactions = async (req, res) => {
             201,
             true,
             'Transazione ricorrente aggiunta correttamente!',
-            recurring_transaction
+            {
+                id: recurring_transaction?.id,
+                walletId: recurring_transaction.wallet_id,
+            }
         );
     } catch (error) {
         // Invio errore alla console
@@ -159,7 +168,7 @@ const patchRecurringTransaction = async (req, res) => {
         // Ricevo dati dalla richiesta
         const { id: recurringTransactionsId } =
             req.body && req.body.where ? req.body.where : {};
-        const { name, amount, type, tagId, recurrence } =
+        const { amount, type, tagId, recurrence } =
             req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
@@ -184,18 +193,8 @@ const patchRecurringTransaction = async (req, res) => {
             return responseHandler(res, 400, false, 'Dati mancanti o invalidi');
 
         // Controllo dati ricevuti
-        if (
-            name &&
-            name?.length < 30 &&
-            name?.length > 3 &&
-            typeof name == 'string'
-        ) {
-            fields.push('name = ?');
-            values.push(name);
-        }
-
         if (amount && !isNaN(amount)) {
-            fields.push('name = ?');
+            fields.push('amount = ?');
             values.push(parseFloat(amount.toFixed(2)));
         }
 

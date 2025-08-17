@@ -1,6 +1,7 @@
 // Importazione moduli
 import { useState } from 'react';
 import { useNotification } from '../hooks/Notification.context';
+import { useAuth } from '../hooks/Auth.context';
 // Importazione immagini
 import modifyImgBLK from '../assets/icons/pen-BLK.png';
 import deleteImgBLK from '../assets/icons/delete-BLK.png';
@@ -23,27 +24,61 @@ const Tag = ({ id, name, color = '#000', handleDelete }) => {
     });
     // Stato errore
     const [error, setError] = useState(null);
+    // Autenticazione
+    const { accessToken } = useAuth();
 
     // Funzione gestione modifica portafoglio
-    const handleModify = () => {
+    const handleModify = async () => {
         // Sanificazione nome
         const sanitizedInput = input.name?.trim();
 
-        // Controllo nome portafoglio
-        if (
-            sanitizedInput?.length <= 30 &&
-            sanitizedInput?.length >= 3 &&
-            (currentTag.name !== input.name || currentTag.color !== input.color)
-        ) {
-            //TODO - Faccio richiesta modifica portafoglio
-            notify('success', 'Il tag è stato modificato correttamente!');
-            // Aggiornamento portafoglio
-            setCurrentTag({ name: input.name, color: input.color });
-        } else {
-            setInput({ color: currentTag.color, name: currentTag.name });
-            setError(
-                'Errore! Il nome deve essere compreso tra i 3 e i 30 caratteri'
-            );
+        const prevCurrentTag = { ...currentTag };
+
+        try {
+            // Controllo nome portafoglio
+            if (
+                sanitizedInput?.length <= 30 &&
+                sanitizedInput?.length >= 3 &&
+                (currentTag.name !== input.name ||
+                    currentTag.color !== input.color)
+            ) {
+                setCurrentTag({ name: input.name, color: input.color });
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/tags`,
+                    {
+                        method: 'PATCH',
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            data: { name: input.name, color: input.color },
+                            where: { id },
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server!'
+                    );
+
+                notify('success', 'Il tag è stato modificato correttamente!');
+            } else {
+                setInput({ color: currentTag.color, name: currentTag.name });
+                setError(
+                    'Errore! Il nome deve essere compreso tra i 3 e i 30 caratteri'
+                );
+            }
+        } catch (error) {
+            notify('error', error.message);
+            setCurrentTag(prevCurrentTag);
         }
     };
 
