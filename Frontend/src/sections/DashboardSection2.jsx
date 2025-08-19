@@ -95,8 +95,14 @@ const DashboardSection2 = ({ walletId }) => {
 
                 // Impostazione bilancio e transazioni
                 setBalance(currentBalance);
+                const nextTransaction = data.data.sort(
+                    (a, b) => new Date(b.date) - new Date(a.date)
+                );
+
                 setTransactions(
-                    data.data.length >= 3 ? data.data[-3] : data.data
+                    data.data.length >= 3
+                        ? nextTransaction.slice(0, 3)
+                        : nextTransaction
                 );
             };
 
@@ -121,9 +127,9 @@ const DashboardSection2 = ({ walletId }) => {
                 setTags(data.data);
             };
 
+            getTags();
             getBalanceTransactions();
             getWallet();
-            getTags();
             // const monthTransactions = [
             //     { id: 1, amount: 100, type: 'income' },
             //     { id: 2, amount: 100, type: 'income' },
@@ -247,12 +253,12 @@ const DashboardSection2 = ({ walletId }) => {
                             </Card>
                             <Card title={'Ultime Transazioni🔁'}>
                                 <div className="flex flex-col items-center gap-5 w-full p-4">
-                                    {transactions.length <= 0 ? (
+                                    {transactions?.length <= 0 ? (
                                         <p className="text-center">
                                             Non sono presenti transazioni
                                         </p>
                                     ) : (
-                                        transactions.map((transaction) => {
+                                        transactions?.map((transaction) => {
                                             return (
                                                 <Transaction
                                                     key={transaction.id}
@@ -260,16 +266,10 @@ const DashboardSection2 = ({ walletId }) => {
                                                     amount={transaction.amount}
                                                     type={transaction.type}
                                                     date={transaction.date}
-                                                    tagColor={
-                                                        tags[
-                                                            tags.findIndex(
-                                                                (tag) =>
-                                                                    tag.id ===
-                                                                    transaction.tag_id
-                                                            )
-                                                        ]?.color || '#000000'
-                                                    }
+                                                    tagId={transaction.tag_id}
                                                     actionBtn={false}
+                                                    tags={tags}
+                                                    redirect={true}
                                                 />
                                             );
                                         })

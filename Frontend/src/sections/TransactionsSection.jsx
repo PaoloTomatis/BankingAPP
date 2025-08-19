@@ -11,7 +11,11 @@ import Input from '../components/Input';
 import addImgBLK from '../assets/icons/add-BLK.png';
 
 // Creazione sezione
-const TransactionsSection = ({ className, recurrents = false }) => {
+const TransactionsSection = ({
+    className,
+    recurrents = false,
+    selectedId = null,
+}) => {
     // Poppuper
     const popup = usePopup();
     // Notificatore
@@ -26,6 +30,15 @@ const TransactionsSection = ({ className, recurrents = false }) => {
     const [error, setError] = useState(null);
     // Autenticazione
     const { accessToken } = useAuth();
+
+    // Scroll
+    useEffect(() => {
+        if (document.getElementById(selectedId) && selectedId) {
+            document
+                .getElementById(selectedId)
+                .scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [transactions, selectedId]);
 
     // Funzione gestione eliminazione transazione
     const handleDelete = (id) => {
@@ -126,7 +139,6 @@ const TransactionsSection = ({ className, recurrents = false }) => {
 
                     // Impostazione transazione
                     setTransactions([
-                        ...transactions,
                         {
                             id: 'waiting',
                             amount: Math.abs(sanitizedValue),
@@ -135,6 +147,7 @@ const TransactionsSection = ({ className, recurrents = false }) => {
                             date: date,
                             type: sanitizedValue >= 0 ? 'income' : 'expense',
                         },
+                        ...transactions,
                     ]);
 
                     // Effettuazione richiesta
@@ -186,7 +199,6 @@ const TransactionsSection = ({ className, recurrents = false }) => {
                 } else {
                     // Impostazione transazione
                     setTransactions([
-                        ...transactions,
                         {
                             id: 'waiting',
                             amount: Math.abs(sanitizedValue),
@@ -196,6 +208,7 @@ const TransactionsSection = ({ className, recurrents = false }) => {
                             last_date: new Date().toISOString(),
                             type: sanitizedValue >= 0 ? 'income' : 'expense',
                         },
+                        ...transactions,
                     ]);
 
                     // Effettuazione richiesta
@@ -273,6 +286,32 @@ const TransactionsSection = ({ className, recurrents = false }) => {
     // Caricamento dati
     useEffect(() => {
         try {
+            const getTags = async () => {
+                // Effettuazione richiesta
+                const req = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/tags`,
+                    {
+                        credentials: 'include',
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                    }
+                );
+
+                // Conversione richiesta
+                const data = await req.json();
+
+                // Controllo richiesta
+                if (!req.ok)
+                    throw new Error(
+                        data?.message || 'Errore interno del server'
+                    );
+
+                // Impostazione tags
+                setTags(data.data);
+            };
+
+            getTags();
+
             if (!recurrents) {
                 const getTransactions = async () => {
                     // Effettuazione richiesta
@@ -295,7 +334,11 @@ const TransactionsSection = ({ className, recurrents = false }) => {
                         );
 
                     // Impostazione transazioni
-                    setTransactions(data.data);
+                    setTransactions(
+                        data.data.sort(
+                            (a, b) => new Date(b.date) - new Date(a.date)
+                        )
+                    );
                 };
 
                 getTransactions();
@@ -328,32 +371,6 @@ const TransactionsSection = ({ className, recurrents = false }) => {
 
                 getRecurrentTransactions();
             }
-
-            const getTags = async () => {
-                // Effettuazione richiesta
-                const req = await fetch(
-                    `${import.meta.env.VITE_API_URL}/api/tags`,
-                    {
-                        credentials: 'include',
-                        method: 'GET',
-                        headers: { Authorization: `Bearer ${accessToken}` },
-                    }
-                );
-
-                // Conversione richiesta
-                const data = await req.json();
-
-                // Controllo richiesta
-                if (!req.ok)
-                    throw new Error(
-                        data?.message || 'Errore interno del server'
-                    );
-
-                // Impostazione tags
-                setTags(data.data);
-            };
-
-            getTags();
         } catch (error) {
             setError(error.message);
         } finally {
@@ -405,15 +422,7 @@ const TransactionsSection = ({ className, recurrents = false }) => {
                                                 : transaction.recurrence
                                         }
                                         recurrent={recurrents ? true : false}
-                                        tagColor={
-                                            tags[
-                                                tags.findIndex(
-                                                    (tag) =>
-                                                        tag.id ===
-                                                        transaction.tag_id
-                                                )
-                                            ]?.color || '#000000'
-                                        }
+                                        tags={tags}
                                         actionBtn={true}
                                         tagId={transaction.tag_id}
                                         walletId={transaction.wallet_id}

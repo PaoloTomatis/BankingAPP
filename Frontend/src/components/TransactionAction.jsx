@@ -15,8 +15,6 @@ const TransactionAction = ({
     setShow,
     recurrent,
 }) => {
-    const oggi = new Date();
-
     const originalTransaction = transaction;
     // Notificatore
     const notify = useNotification();
@@ -304,7 +302,7 @@ const TransactionAction = ({
                         <div className="flex items-center justify-center">
                             <p className="text-large font-bold">Tag:</p>
                             <select
-                                value={localTransaction.tagId}
+                                value={localTransaction.tagId || ''}
                                 onChange={(e) => {
                                     setLocalTransaction({
                                         ...localTransaction,

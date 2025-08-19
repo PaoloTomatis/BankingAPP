@@ -23,7 +23,7 @@ const Warning = () => {
 
     return (
         <>
-            <p className="mt-[5vh] max-w-[400px] text-center text-error font-bold">
+            <p className="mt-[5vh] max-w-[95%] w-[400px] text-center text-error font-bold">
                 In quanto questo sito web è stato creato al solo scopo personale
                 è ASSOLUTAMENTE VIETATO entrarci senza autorizzazione dal
                 proprietario. L'ingresso è a rischio e pericolo del visitatore!

@@ -738,6 +738,10 @@ video {
   width: 35px;
 }
 
+.w-\[400px\] {
+  width: 400px;
+}
+
 .w-\[40px\] {
   width: 40px;
 }
@@ -793,6 +797,10 @@ video {
 
 .max-w-\[500px\] {
   max-width: 500px;
+}
+
+.max-w-\[95\%\] {
+  max-width: 95%;
 }
 
 .translate-y-0 {

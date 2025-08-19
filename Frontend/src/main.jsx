@@ -96,6 +96,14 @@ const router = createBrowserRouter([
         ),
     },
     {
+        path: '/transactions-history/:id',
+        element: (
+            <ProtectedRoute auth={true}>
+                <TransactionsHistory />
+            </ProtectedRoute>
+        ),
+    },
+    {
         path: '/transactions-recurrent',
         element: (
             <ProtectedRoute auth={true}>

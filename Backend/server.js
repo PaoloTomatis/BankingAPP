@@ -17,7 +17,11 @@ const PORT = process.env.PORT || 3000;
 // Middleware per cors
 app.use(
     cors({
-        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+        origin: [
+            process.env.FRONTEND_URL || null,
+            'http://192.168.1.51:5173',
+            'http://localhost:5173',
+        ],
         credentials: true,
     })
 );
@@ -39,4 +43,6 @@ app.use((req, res) => {
 });
 
 // Avvio del server
-app.listen(PORT, () => console.log('Server avviato alla porta ' + PORT));
+app.listen(PORT, '0.0.0.0', () =>
+    console.log('Server avviato alla porta ' + PORT)
+);

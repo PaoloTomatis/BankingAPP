@@ -89,6 +89,21 @@ const postTransactions = async (req, res) => {
                 'Login non effettuato correttamente!'
             );
 
+        const [walletsId] = await pool.query(
+            'SELECT id FROM wallets WHERE user_id = ?',
+            [userId]
+        );
+
+        if (!walletId && walletsId.length >= 1) {
+            walletId = walletsId[0].id;
+        } else if (!walletId && walletsId.length <= 0)
+            responseHandler(
+                res,
+                400,
+                false,
+                'Non è presente alcun portafoglio'
+            );
+
         // Controllo dati ricevuti
         if (
             !type ||
@@ -106,21 +121,6 @@ const postTransactions = async (req, res) => {
                 'Dati mancanti o invalidi!'
             );
 
-        const [walletsId] = await pool.query(
-            'SELECT id FROM wallets WHERE user_id = ?',
-            [userId]
-        );
-
-        if (!walletId && walletsId.length >= 1) {
-            walletId = walletsId[0].id;
-        } else if (!walletId && walletsId.length <= 0)
-            responseHandler(
-                res,
-                400,
-                false,
-                'Non è presente alcun portafoglio'
-            );
-
         // Esecuzione aggiunta transazione
         await pool.query(
             'INSERT INTO transactions (user_id, wallet_id, amount, type, tag_id, date) VALUES (?, ?, ?, ?, ?, ?)',
@@ -136,8 +136,8 @@ const postTransactions = async (req, res) => {
 
         // Esecuzione richiesta transazione
         const [[transaction]] = await pool.query(
-            'SELECT id, wallet_id FROM transactions WHERE user_id = ? AND type = ? AND date = ?',
-            [userId, type, date]
+            'SELECT id, wallet_id FROM transactions WHERE user_id = ? AND type = ? AND date = ? AND amount = ?',
+            [userId, type, date, parseFloat(amount.toFixed(2))]
         );
 
         // Invio risposta finale
@@ -163,7 +163,7 @@ const patchTransaction = async (req, res) => {
         // Ricevo dati dalla richiesta
         const { id: transactionId } =
             req.body && req.body.where ? req.body.where : {};
-        const { type, tagId, amount } =
+        const { type, tagId, amount, walletId, date } =
             req.body && req.body.data ? req.body.data : {};
         const { id: userId } = req.user ? req.user : {};
 
@@ -203,9 +203,19 @@ const patchTransaction = async (req, res) => {
             values.push(tagId);
         }
 
+        if (walletId && !isNaN(walletId)) {
+            fields.push('wallet_id = ?');
+            values.push(walletId);
+        }
+
         if (amount && !isNaN(amount)) {
             fields.push('amount = ?');
             values.push(parseFloat(amount.toFixed(2)));
+        }
+
+        if (date && typeof date == 'string') {
+            fields.push('date = ?');
+            values.push(date);
         }
 
         // Controllo dati ricevuti

@@ -188,8 +188,6 @@ const patchTag = async (req, res) => {
             values.push(name);
         }
 
-        console.log(color);
-
         if (
             color &&
             color?.length <= 7 &&
