@@ -6,6 +6,7 @@ import { configDotenv } from 'dotenv';
 import authRouter from './routes/auth.router.js';
 import apiRouter from './routes/api.router.js';
 import verifyJWT from './middlewares/verifyJWT.middleware.js';
+import recurrentAction from './tasks/recurrentAction.js';
 
 // Configurazione .env
 configDotenv();
@@ -13,6 +14,8 @@ configDotenv();
 const app = express();
 // Definizione della porta
 const PORT = process.env.PORT || 3000;
+
+setInterval(recurrentAction, 60000);
 
 // Middleware per cors
 app.use(

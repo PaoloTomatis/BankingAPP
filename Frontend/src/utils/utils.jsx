@@ -65,6 +65,8 @@ const formatRecurrency = (intervalStr, type) => {
                 return `${value} ${value !== 1 ? 'ore' : 'ora'}`;
             case 'd':
                 return `${value} ${value !== 1 ? 'giorni' : 'giorno'}`;
+            case 'w':
+                return `${value} ${value !== 1 ? 'settimane' : 'settimana'}`;
             case 'M':
                 return `${value} ${value !== 1 ? 'mesi' : 'mese'}`;
             case 'y':
