@@ -76,6 +76,20 @@ const postWallets = async (req, res) => {
                 'Login non effettuato correttamente!'
             );
 
+        // Esecuzione richiesta categoria
+        const [[duplicateWallet]] = await pool.query(
+            'SELECT id FROM wallets WHERE name = ? AND user_id = ?',
+            [name || '', userId]
+        );
+
+        if (duplicateWallet)
+            return responseHandler(
+                res,
+                409,
+                false,
+                'Il nome del portafoglio è già in uso!'
+            );
+
         // Controllo dei dati ricevuti
         if (
             !name ||
