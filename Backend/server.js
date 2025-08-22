@@ -21,7 +21,7 @@ setInterval(recurrentAction, 60000);
 app.use(
     cors({
         origin: [
-            process.env.FRONTEND_URL || null,
+            process.env.FRONTEND_URL || "https://banking-app-khaki-seven.vercel.app",
             'http://192.168.1.51:5173',
             'http://localhost:5173',
         ],
