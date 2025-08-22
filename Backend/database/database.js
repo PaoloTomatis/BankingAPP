@@ -1,7 +1,6 @@
 // Importazione moduli
 import { createPool } from 'mysql2';
 import { configDotenv } from 'dotenv';
-import fs from 'fs';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -15,7 +14,7 @@ const pool = createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    ssl: isProduction ? { ca: fs.readFileSync('./ca.pem') } : undefined,
+    ssl: isProduction ? { ca: process.env.DB_CA_CERT } : undefined,
 }).promise();
 
 // Esportazione della connessione
