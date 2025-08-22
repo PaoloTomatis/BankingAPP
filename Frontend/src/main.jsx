@@ -14,7 +14,7 @@ import Auth from './pages/Auth';
 import Tags from './pages/Tags';
 import Transactions from './pages/Transactions';
 import TransactionsHistory from './pages/TransactionsHistory';
-import TransactionsRecurrent from './pages/TRansactionsRecurrent';
+import TransactionsRecurrent from './pages/TransactionsRecurrent';
 import Account from './pages/Account';
 import Page404 from './pages/Page404';
 import Warning from './pages/Warning';
